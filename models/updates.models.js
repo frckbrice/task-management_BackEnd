@@ -5,18 +5,11 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true,
       allowNull: false,
     },
-    task_update_code: {
+    task_update_action: {
       type: DataTypes.STRING,
     },
     task_update_description: {
       type: DataTypes.STRING,
-    },
-    task_update_status: {
-      type: DataTypes.STRING,
-    },
-    task_update_date: {
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW(),
     },
     task_remarks: {
       type: DataTypes.STRING,

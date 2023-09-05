@@ -16,4 +16,7 @@ module.exports = {
       res.type("text").send("404 Page Not Found");
     }
   },
+
+  memberController: require('./member.controller'),
+  authController: require('./auth.controller'),
 };

@@ -8,42 +8,38 @@ module.exports = (sequelize, DataTypes) => {
         primaryKey: true,
         allowNull: false,
       },
-      project_member_code: {
-        type: DataTypes.STRING,
-      },
-
       project_member_name: {
         type: DataTypes.STRING,
       },
       project_member_contact: {
         type: DataTypes.STRING,
       },
-      project_member_email: {
-        type: DataTypes.STRING,
-        validate: {
-          isEmail: true,
-        },
-      },
       project_member_username: {
         type: DataTypes.STRING,
+
+        get() {
+          const rawValue = this.getDataValue("project_member_username");
+          return rawValue ? rawValue.toLowerCase() : "Unknown username";
+        },
       },
       project_member_password: {
-        type: DataTypes.STRING,
-      },
-      project_member_status: {
-        type: DataTypes.STRING,
-      },
-      project_member_startingDate: {
         type: DataTypes.STRING,
       },
       project_member_skills: {
         type: DataTypes.TEXT,
       },
+      project_member_role: {
+        type: DataTypes.STRING,
+      },
+      project_member_active: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true,
+      },
     },
     {
       validate: {
         usernamePassMatch() {
-          if (this.username === this.password) {
+          if (this.project_member_username === this.project_member_password) {
             throw new Error("Password and username shoud not match");
           }
         },
