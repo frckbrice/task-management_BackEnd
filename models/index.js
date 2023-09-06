@@ -20,7 +20,7 @@ db.models.Member = require("./member.model")(sequelize, Sequelize.DataTypes);
 db.models.Task = require("./task.model")(sequelize, Sequelize.DataTypes);
 db.models.Updates = require("./updates.models")(sequelize, Sequelize.DataTypes);
 db.models.Team = require("./team.model")(sequelize, Sequelize.DataTypes);
-db.models.Roles = require("./roles.model")(sequelize, Sequelize.DataTypes);
+// db.models.Roles = require("./roles.model")(sequelize, Sequelize.DataTypes);
 db.models.TeamMember = require("./teamMember.model")(
   sequelize,
   Sequelize.DataTypes
@@ -30,7 +30,15 @@ db.models.TaskMember = require("./taskmember.model")(
   Sequelize.DataTypes
 );
 
-const { Project, Member, Task, Updates, Team, Roles, TeamMember, TaskMember } =
+const { 
+  Project,
+  Member,
+  Task,
+  Updates,
+  Team,
+  // Roles,
+  // TeamMember,
+  TaskMember } =
   db.models;
 
 db.sequelize = sequelize;
@@ -57,10 +65,10 @@ Member.belongsToMany(Task, { through: TaskMember });
 Member.belongsTo(Team);
 Team.hasMany(Member);
 
-Member.hasMany(Member, { as: "invitedMember", foreignKey: "projectManagerId" });
+Member.hasMany(Member, { as: "invitedMember", foreignKey: "projectManager" });
 Member.belongsTo(Member, {
   as: "project_manager",
-  foreignKey: "projectManagerId",
+  foreignKey: "projectManager",
 });
 
 // Roles.hasMany(Member);

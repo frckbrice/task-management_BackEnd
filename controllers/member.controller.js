@@ -1,4 +1,5 @@
 const { Member, Project, Team, Task } = require("../models").models;
+const { Op } = require("sequelize");
 
 const bcrypt = require("bcrypt");
 
@@ -32,12 +33,12 @@ module.exports = {
       project_member_skills,
       project_member_role,
       project_member_active,
+      // projectManager
     } = req.body;
 
     if (
       !project_member_username ||
       !project_member_password ||
-      !Boolean(project_member_active) ||
       !project_member_role
     ) {
       return res.json({ message: "All fields are required" });
@@ -55,6 +56,30 @@ module.exports = {
         .status(409)
         .json({ message: `${project_member_username} already exists` });
     }
+
+    // if (project_member_role !== "manager") {
+    //   const manager = await Project.findOne({
+    //     where: {
+    //       project_member_role: {
+    //         [Op.eq]: "manager",
+    //       },
+    //     },
+    //   });
+
+    //   if (project_member_role !== "manager") {
+    //     const manager = await Member.findOne({
+    //       where: {
+    //         project_member_role: {
+    //           [Op.eq]: "manager",
+    //         },
+    //       },
+    //     });
+
+    //     if (manager) {
+    //       projectManager = manager.id;
+    //     }
+    //   }
+    // }
 
     const hashPw = await bcrypt.hash(project_member_password, 10);
 

@@ -29,7 +29,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.TEXT,
       },
       project_member_role: {
-        type: DataTypes.STRING,
+        type: DataTypes.ENUM('admin', 'manager', 'invited'),
       },
       project_member_active: {
         type: DataTypes.BOOLEAN,

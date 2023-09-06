@@ -9,7 +9,7 @@ module.exports = {
   noRoutes: (req, res) => {
     res.status(404);
     if (req.accepts("html")) {
-       res.sendFile(path.join(__dirname, "..", "views", "404.html"));
+      res.sendFile(path.join(__dirname, "..", "views", "404.html"));
     } else if (req.accepts("json")) {
       res.json({ message: "404, Page Not Found" });
     } else {
@@ -17,6 +17,10 @@ module.exports = {
     }
   },
 
-  memberController: require('./member.controller'),
-  authController: require('./auth.controller'),
+  memberController: require("./member.controller"),
+  authController: require("./auth.controller"),
+  projectController: require('./project.controller'),
+  taskController: require('./task.controller'),
+  updatesController: require('./updates.controller'),
+  teamController: require('./team.controller')
 };

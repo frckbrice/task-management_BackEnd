@@ -23,10 +23,10 @@ app.use(cookieParser());
 app.use("/", express.static(path.join(__dirname, "/public")));
 app.use("/", require("./routes/root.routes"));
 app.use("/members", require("./routes/member.route"));
-// app.use("/tasks", require("./routes/task.route"));
-// app.use("/project", require("./routes/project.route"));
-// app.use("/updates", require("./routes/updates.routes"));
-// app.use("/teams", require("./routes/team.routes"));
+app.use("/tasks", require("./routes/task.route"));
+app.use("/projects", require("./routes/project.route"));
+app.use("/updates", require("./routes/updates.routes"));
+app.use("/teams", require("./routes/team.routes"));
 app.use("/auth", require("./routes/auth.route"));
 
 app.all("*", root.noRoutes);
@@ -34,7 +34,7 @@ app.use(errorHandler);
 
 (async () => {
   await db.sequelize
-    .sync()
+    .sync({ alter: true })
     .then(() => {
       console.log("database connected successfully");
     })

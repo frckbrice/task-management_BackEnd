@@ -9,9 +9,9 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
     },
     task_update_description: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
     },
-    task_remarks: {
+    task_update_remarks: {
       type: DataTypes.STRING,
     },
   });

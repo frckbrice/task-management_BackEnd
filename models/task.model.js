@@ -3,30 +3,39 @@ module.exports = (sequelize, DataTypes) => {
     id: {
       type: DataTypes.UUID,
       primaryKey: true,
+      defaultValue: DataTypes.UUIDV4,
       allowNull: false,
     },
-    task_code: {
+    task_name: {
       type: DataTypes.STRING,
     },
     task_description: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
     },
     task_status: {
       type: DataTypes.STRING,
     },
     task_startdate: {
-      type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW(),
+      type: DataTypes.STRING,
     },
-    task_enddate: {
+    task_completed: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    task_endDate: {
       type: DataTypes.DATE,
+      get() {
+        const completed = this.getDataValue("task_completed");
+
+        return completed ? new Date() : null;
+      },
     },
     task_remarks: {
       type: DataTypes.STRING,
     },
-    task_color: {
-      type: DataTypes.STRING,
-    },
+    // task_color: {
+    //   type: DataTypes.STRING,
+    // },
   });
 
   return Task;

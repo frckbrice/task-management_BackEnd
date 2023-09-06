@@ -8,10 +8,6 @@ module.exports = (sequelize, DataTypes) => {
     team_name: {
       type: DataTypes.STRING,
     },
-
-    team_code: {
-      type: DataTypes.STRING,
-    },
     team_description: {
       type: DataTypes.STRING,
     },
