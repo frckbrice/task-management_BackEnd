@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
   const TaskMember = sequelize.define(
-    "task_member",
+    "taskMember",
     {
       id: {
         type: DataTypes.UUID,
@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       end_date: DataTypes.DATE,
       task_member_observation: DataTypes.TEXT,
-      task_state: DataTypes.STRING
+      task_status: DataTypes.STRING,
     },
     {
       // timestamps: false,

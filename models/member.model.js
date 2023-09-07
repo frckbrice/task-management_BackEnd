@@ -1,12 +1,12 @@
 module.exports = (sequelize, DataTypes) => {
   const Member = sequelize.define(
-    "project_member",
+    "projectMember",
     {
       id: {
         type: DataTypes.UUID,
+        allowNull: false,
         defaultValue: DataTypes.UUIDV4,
         primaryKey: true,
-        allowNull: false,
       },
       project_member_name: {
         type: DataTypes.STRING,
@@ -19,7 +19,7 @@ module.exports = (sequelize, DataTypes) => {
 
         get() {
           const rawValue = this.getDataValue("project_member_username");
-          return rawValue ? rawValue.toLowerCase() : "Unknown username";
+          return rawValue ? rawValue.toLowerCase() : "Unknown Member";
         },
       },
       project_member_password: {
@@ -29,7 +29,9 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.TEXT,
       },
       project_member_role: {
-        type: DataTypes.ENUM('admin', 'manager', 'invited'),
+        type: DataTypes.ENUM("admin", "manager", "invitie"),
+        allowNull: false,
+        defaultValue: "manager",
       },
       project_member_active: {
         type: DataTypes.BOOLEAN,

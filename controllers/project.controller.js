@@ -23,7 +23,8 @@ module.exports = {
   getProjectMembers: async (req, res) => {
     const { id } = req.body;
 
-    if (!id) return res.status(400).json({ message: " Id is needed" });
+    if (!id)
+      return res.status(400).json({ message: " Id is needed" });
 
     // const targetProject = await Project.findByPk(id, {
     //   include: Team,

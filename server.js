@@ -3,7 +3,7 @@ require("express-async-error");
 require("dotenv").config();
 const errorHandler = require("./middleware/errorHandler");
 const root = require("./controllers");
-const { logger } = require("./middleware/logger");
+const { logger, logEvents } = require("./middleware/logger");
 const cors = require("cors");
 const corsOptions = require("./config/corsOptions.Js");
 const cookieParser = require("cookie-parser");
@@ -27,19 +27,23 @@ app.use("/tasks", require("./routes/task.route"));
 app.use("/projects", require("./routes/project.route"));
 app.use("/updates", require("./routes/updates.routes"));
 app.use("/teams", require("./routes/team.routes"));
-app.use("/auth", require("./routes/auth.route"));
+// app.use("/auth", require("./routes/auth.route"));
 
 app.all("*", root.noRoutes);
 app.use(errorHandler);
 
 (async () => {
   await db.sequelize
-    .sync({ alter: true })
+    .sync({ force: true })
     .then(() => {
       console.log("database connected successfully");
     })
-    .catch(function (error) {
-      console.log("Failed to connect to MYSQL DATABASE", error);
+    .catch(function (err) {
+      console.log("Failed to connect to MYSQL DATABASE\n", err.message);
+      logEvents(
+        `${err.no}:${err.message}\t${err.syscall}\t${err.hostname}`,
+        "sequelErrLog.log"
+      );
     });
 })();
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

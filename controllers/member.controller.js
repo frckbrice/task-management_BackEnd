@@ -9,7 +9,7 @@ module.exports = {
   //access Private
 
   getAllMembers: async (req, res) => {
-    await Member.findAll({
+    Member.findAll({
       attributes: {
         exclude: ["project_member_password"],
       },
@@ -33,20 +33,22 @@ module.exports = {
       project_member_skills,
       project_member_role,
       project_member_active,
-      // projectManager
     } = req.body;
 
     if (
       !project_member_username ||
       !project_member_password ||
-      !project_member_role
+      !project_member_role ||
+      !project_member_skills || 
+      !project_member_active 
+      
     ) {
       return res.json({ message: "All fields are required" });
     }
 
     const duplicates = await Member.findOne({
       where: {
-        project_member_username: project_member_username,
+        project_member_username
       },
     });
 
@@ -80,7 +82,7 @@ module.exports = {
     //     }
     //   }
     // }
-
+    //* hash password
     const hashPw = await bcrypt.hash(project_member_password, 10);
 
     const uniformMember = {

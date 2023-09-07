@@ -36,6 +36,10 @@ module.exports = (sequelize, DataTypes) => {
     // task_color: {
     //   type: DataTypes.STRING,
     // },
+    projectId: {
+      type: DataTypes.UUID,
+      allowNull: false
+    },
   });
 
   return Task;

@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
   const TeamMember = sequelize.define(
-    "team_member",
+    "teamMember",
     {
       id: {
         type: DataTypes.UUID,

@@ -8,7 +8,7 @@ module.exports = {
   //@route GET /teams
   //access Private
 
-  getAllTeam: async (req, res) => {
+  getAllTeams: async (req, res) => {
     Team.findAll().then((data) => {
       console.log(data);
       if (!data.length)
@@ -52,7 +52,7 @@ module.exports = {
   //@desc team a team
   //@route PATCH /teams
   //access Private
-  teamTeam: async (req, res) => {
+  updateTeam: async (req, res) => {
     const {
       id,
       team_name,
@@ -81,9 +81,7 @@ module.exports = {
 
     if (duplicates && duplicates.id.toString() !== id.toString()) {
       console.log(duplicates);
-      return res
-        .status(409)
-        .json({ message: "This team name already exists" });
+      return res.status(409).json({ message: "This team name already exists" });
     }
 
     existingTeam.team_name = team_name;

@@ -1,5 +1,5 @@
 const { DataTypes } = require("sequelize");
-
+const Member = require('./member.model')
 module.exports = (sequelize, DataTypes) => {
   const Project = sequelize.define("project", {
     id: {
@@ -36,6 +36,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
     },
     project_status: DataTypes.STRING,
+    projectManagerId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      
+    },
   });
 
   return Project;

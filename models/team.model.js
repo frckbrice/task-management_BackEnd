@@ -1,9 +1,9 @@
 module.exports = (sequelize, DataTypes) => {
-  const Team = sequelize.define('project_team', {
+  const Team = sequelize.define("projectTeam", {
     id: {
       type: DataTypes.UUID,
       allowNull: false,
-      primaryKey: true
+      primaryKey: true,
     },
     team_name: {
       type: DataTypes.STRING,
@@ -19,8 +19,12 @@ module.exports = (sequelize, DataTypes) => {
     },
     team_status: {
       type: DataTypes.STRING,
-    }
-  })
+    },
+    projectId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+    },
+  });
 
   return Team;
 }
