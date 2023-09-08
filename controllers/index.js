@@ -22,5 +22,6 @@ module.exports = {
   projectController: require('./project.controller'),
   taskController: require('./task.controller'),
   updatesController: require('./updates.controller'),
-  teamController: require('./team.controller')
+  teamController: require('./team.controller'),
+  authController: require('./auth.controller'),
 };

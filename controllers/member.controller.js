@@ -68,15 +68,6 @@ module.exports = {
     //     },
     //   });
 
-    //   if (project_member_role !== "manager") {
-    //     const manager = await Member.findOne({
-    //       where: {
-    //         project_member_role: {
-    //           [Op.eq]: "manager",
-    //         },
-    //       },
-    //     });
-
     //     if (manager) {
     //       projectManager = manager.id;
     //     }

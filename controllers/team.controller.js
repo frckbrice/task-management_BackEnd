@@ -85,7 +85,6 @@ module.exports = {
     }
 
     existingTeam.team_name = team_name;
-
     existingTeam.team_description = team_description;
     existingTeam.team_logo = team_logo;
     existingTeam.team_status = team_status;

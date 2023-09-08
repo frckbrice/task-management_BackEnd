@@ -38,6 +38,8 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: true,
       },
     },
+    /* "username":"tato@gmail.com",
+  "password":"test123"*/
     {
       validate: {
         usernamePassMatch() {
