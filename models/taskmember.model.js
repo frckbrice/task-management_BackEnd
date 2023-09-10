@@ -6,13 +6,13 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.UUID,
         primaryKey: true,
       },
-      start_date: {
+      date: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW(),
       },
-      end_date: DataTypes.DATE,
-      task_member_observation: DataTypes.TEXT,
-      task_status: DataTypes.STRING,
+    
+      observation: DataTypes.TEXT,
+      taskStatus: DataTypes.STRING,
     },
     {
       // timestamps: false,

@@ -9,12 +9,15 @@ const corsOptions = require("./config/corsOptions.Js");
 const cookieParser = require("cookie-parser");
 const path = require("path");
 const db = require("./models");
+const passport = require("passport");
 
 const PORT = process.env.PORT || 4000;
 const app = express();
 
 app.use(logger);
 app.use(cors(corsOptions));
+
+require('./auth/passportGoogleSSO');
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -28,6 +31,16 @@ app.use("/projects", require("./routes/project.route"));
 app.use("/updates", require("./routes/updates.routes"));
 app.use("/teams", require("./routes/team.routes"));
 app.use("/auth", require("./routes/auth.route"));
+
+app.use(
+  require("express-session")({
+    secret: "keyboard cat",
+    resave: true,
+    saveUninitialized: true,
+  })
+);
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.all("*", root.noRoutes);
 app.use(errorHandler);

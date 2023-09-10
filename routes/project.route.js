@@ -4,7 +4,7 @@ const {projectController} = require('../controllers');
 
 const verifyJwt = require('../middleware/verifyJwt')
 
-// router.use(verifyJwt);
+router.use(verifyJwt);
 
 router
   .route('/')

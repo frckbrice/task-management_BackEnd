@@ -6,8 +6,8 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
-    invitationDate: DataTypes.DATE,
-    invitationAccepted: DataTypes.BOOLEAN,
+    date: DataTypes.DATE,
+    accepted: DataTypes.BOOLEAN,
     projectId: {
       type: DataTypes.UUID,
       allowNull: false,

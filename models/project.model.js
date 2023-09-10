@@ -8,23 +8,23 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: DataTypes.UUIDV4,
       allowNull: false,
     },
-    project_name: {
+    name: {
       type: DataTypes.STRING,
     },
-    project_description: {
+    description: {
       type: DataTypes.TEXT,
     },
-    project_banner: {
+    banner: {
       type: DataTypes.STRING,
     },
-    project_startDate: {
+    startDate: {
       type: DataTypes.DATE,
     },
-    project_estimateEndDate: {
+    estimateEndDate: {
       type: DataTypes.DATE,
     },
-    project_completed: DataTypes.BOOLEAN,
-    project_endDate: {
+    completed: DataTypes.BOOLEAN,
+    endDate: {
       type: DataTypes.DATE,
       get() {
         const completed = this.getDataValue("task_completed");
@@ -32,10 +32,10 @@ module.exports = (sequelize, DataTypes) => {
         return completed ? new Date() : null;
       },
     },
-    project_remarks: {
+    remarks: {
       type: DataTypes.STRING,
     },
-    project_status: DataTypes.STRING,
+    status: DataTypes.STRING,
     projectManagerId: {
       type: DataTypes.UUID,
       allowNull: false,

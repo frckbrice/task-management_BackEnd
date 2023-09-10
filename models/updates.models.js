@@ -8,16 +8,20 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       defaultValue: DataTypes.UUIDV4,
     },
-    task_update_action: {
+    action: {
       type: DataTypes.STRING,
     },
-    task_update_description: {
+    description: {
       type: DataTypes.TEXT,
     },
-    task_update_remarks: {
+    remarks: {
       type: DataTypes.STRING,
     },
     projectMemberId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+    },
+    taskId: {
       type: DataTypes.UUID,
       allowNull: false,
     },

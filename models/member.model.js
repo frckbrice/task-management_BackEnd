@@ -8,34 +8,45 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: DataTypes.UUIDV4,
         primaryKey: true,
       },
-      project_member_name: {
+      name: {
         type: DataTypes.STRING,
+        allowNull: true,
       },
-      project_member_contact: {
+      contact: {
         type: DataTypes.STRING,
+        allowNull: true,
       },
-      project_member_username: {
+      username: {
         type: DataTypes.STRING,
 
         get() {
-          const rawValue = this.getDataValue("project_member_username");
+          const rawValue = this.getDataValue("username");
           return rawValue ? rawValue.toLowerCase() : "Unknown Member";
         },
       },
-      project_member_password: {
+      password: {
         type: DataTypes.STRING,
       },
-      project_member_skills: {
+      skills: {
         type: DataTypes.TEXT,
+        allowNull: true,
       },
-      project_member_role: {
+      role: {
         type: DataTypes.ENUM("admin", "manager", "invitie"),
         allowNull: false,
         defaultValue: "manager",
       },
-      project_member_active: {
+      isActive: {
         type: DataTypes.BOOLEAN,
         defaultValue: true,
+      },
+      picture: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      googleId: {
+        type: DataTypes.STRING,
+        allowNull: true,
       },
     },
     /* "username":"tato@gmail.com",
@@ -43,7 +54,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       validate: {
         usernamePassMatch() {
-          if (this.project_member_username === this.project_member_password) {
+          if (this.username === this.password) {
             throw new Error("Password and username shoud not match");
           }
         },

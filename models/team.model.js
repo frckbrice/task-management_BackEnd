@@ -5,19 +5,19 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       primaryKey: true,
     },
-    team_name: {
+    name: {
       type: DataTypes.STRING,
     },
-    team_description: {
+    description: {
       type: DataTypes.STRING,
     },
-    team_logo: {
+    logo: {
       type: DataTypes.STRING,
     },
-    team_color: {
+    color: {
       type: DataTypes.STRING,
     },
-    team_status: {
+    status: {
       type: DataTypes.STRING,
     },
     projectId: {

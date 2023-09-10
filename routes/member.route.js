@@ -4,7 +4,7 @@ const {memberController} = require('../controllers');
 
 const verifyJwt = require('../middleware/verifyJwt')
 
-// router.use(verifyJwt);
+router.use(verifyJwt);
 
 router
   .route('/')
@@ -12,6 +12,7 @@ router
   .post(memberController.createMember)
   .patch(memberController.updateMember)
   .delete(memberController.deleteMember)
+
 
 
   module.exports = router;

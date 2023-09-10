@@ -1,5 +1,6 @@
 const { Member, Project, Team, Task } = require("../models").models;
 const { Op } = require("sequelize");
+const asyncHandler = require("express-async-handler");
 
 const bcrypt = require("bcrypt");
 
@@ -8,23 +9,28 @@ module.exports = {
   //@route GET /members
   //access Private
 
-  getAllMembers: async (req, res) => {
+  getAllMembers: asyncHandler(async (req, res) => {
     Member.findAll({
       attributes: {
         exclude: ["project_member_password"],
       },
-    }).then((data) => {
-      console.log(data);
-      if (!data.length)
-        return res.status(400).json({ message: "No members found" });
-      res.json(data);
-    });
-  },
+    })
+      .then((data) => {
+        console.log(data);
+        if (!data.length)
+          return res.status(400).json({ message: "No members found" });
+        res.json(data);
+      })
+      .catch(function (err) {
+        console.log("An error occured while loading members", err);
+        return res.status(500).json({ message: "Not able to find members for the moment. please try again later" });
+      });
+  }),
 
   //@desc create member
   //@route POST /members
   //access private
-  createMember: async (req, res) => {
+  createMember: asyncHandler(async (req, res) => {
     const {
       project_member_name,
       project_member_contact,
@@ -32,25 +38,25 @@ module.exports = {
       project_member_password,
       project_member_skills,
       project_member_role,
-      project_member_active,
+      project_member_isActive,
+      project_member_picture,
     } = req.body;
 
     if (
       !project_member_username ||
       !project_member_password ||
       !project_member_role ||
-      !project_member_skills || 
-      !project_member_active 
-      
+      !project_member_skills ||
+      !project_member_isActive
     ) {
       return res.json({ message: "All fields are required" });
     }
 
     const duplicates = await Member.findOne({
       where: {
-        project_member_username
+        project_member_username,
       },
-    });
+    })
 
     if (duplicates) {
       console.log(duplicates);
@@ -77,32 +83,34 @@ module.exports = {
     const hashPw = await bcrypt.hash(project_member_password, 10);
 
     const uniformMember = {
-      project_member_active,
+      project_member_isActive,
       project_member_contact,
       project_member_name,
       project_member_password: hashPw,
       project_member_role,
       project_member_skills,
       project_member_username,
+      project_member_picture,
     };
 
-    Member.create(uniformMember).then((data) => {
-      if (data) {
-        console.log(data);
-        res.status(201).json({
-          message: `The member ${project_member_username} successfully created`,
-          data,
-        });
-      } else {
-        return res.json({ message: "Failed to create member" });
-      }
-    });
-  },
+    Member.create(uniformMember)
+      .then((data) => {
+        if (data) {
+          console.log(data);
+          res.status(201).json({
+            message: `The user ${project_member_username} successfully created`,
+            data,
+          });
+        } else {
+          return res.json({ message: "Failed to create user" });
+        }
+      })
+  }),
 
   //@desc update a member
   //@route PATCH /members
   //access Private
-  updateMember: async (req, res) => {
+  updateMember: asyncHandler(async (req, res) => {
     const {
       id,
       project_member_name,
@@ -111,7 +119,8 @@ module.exports = {
       project_member_password,
       project_member_skills,
       project_member_role,
-      project_member_active,
+      project_member_isActive,
+      project_member_picture,
     } = req.body;
 
     if (
@@ -134,7 +143,7 @@ module.exports = {
       where: {
         project_member_username,
       },
-    });
+    })
 
     if (duplicates && duplicates.id.toString() !== id.toString()) {
       return res
@@ -142,13 +151,14 @@ module.exports = {
         .json({ message: "duplicates member: same username" });
     }
 
-    existingMember.project_member_active = project_member_active;
+    existingMember.project_member_isActive = project_member_isActive;
     existingMember.project_member_contact = project_member_contact;
     existingMember.project_member_name = project_member_name;
 
     existingMember.project_member_role = project_member_role;
     existingMember.project_member_skills = project_member_skills;
     existingMember.project_member_username = project_member_username;
+    existingMember.project_member_picture = project_member_picture;
 
     if (project_member_password) {
       existingMember.project_member_password = await bcrypt.hash(
@@ -159,12 +169,12 @@ module.exports = {
 
     await existingMember.save();
     res.json({ msg: `user successfully updated` });
-  },
+  }),
 
   //@desc delete a member
   //@route DELETE /members
   //access Private
-  deleteMember: async (req, res) => {
+  deleteMember: asyncHandler(async (req, res) => {
     const { id } = req.body;
 
     if (!id) {
@@ -180,12 +190,19 @@ module.exports = {
         .json({ message: `The member with id ${id} doesn't exist` });
     }
 
-    const deletedMember = await existingMember.destroy();
+    const deletedMember = await existingMember
+      .destroy();
 
     if (deletedMember) {
       return res
         .status(201)
         .json({ message: `The member with id ${id} deleted successfully` });
     }
-  },
+  }),
+
+  //google authenticated user
+  googleinvitedMember: asyncHandler(async(req, res)=> {
+    res.json({message: "google authenticated member", user: req.user})
+  } )
+
 };

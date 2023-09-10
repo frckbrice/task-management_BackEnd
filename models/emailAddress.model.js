@@ -2,16 +2,16 @@ const Member = require("./member.model");
 
 module.exports = (sequelize, DataTypes) => {
   const EmailAddress = sequelize.define("emailAddress", {
-    emailtoken: {
+    token: {
       type: DataTypes.UUID,
       primaryKey: true,
       allowNull: false,
       defaultValue: DataTypes.UUIDV4,
     },
-    emailDesignation: {
+    designation: {
       type: DataTypes.STRING,
     },
-    emailProvider: {
+    provider: {
       type: DataTypes.STRING,
     },
     projectMemberId: {
@@ -20,5 +20,5 @@ module.exports = (sequelize, DataTypes) => {
     },
   });
 
-  return EmailAddress;
+  return Address;
 };

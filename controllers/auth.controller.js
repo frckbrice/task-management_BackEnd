@@ -2,13 +2,24 @@ const {Member} = require("../models").models;
 // require("dotenv").config();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const asyncHandler = require('express-async-handler')
+const asyncHandler = require('express-async-handler');
+const passport = require('passport');
 
 module.exports = {
+  //@desc register
+  //@route POST /register
+  //@access Public
+
+  register: asyncHandler(async(req, res) => {
+      
+
+
+  }),
+
   //@desc Login
   //@route POST /auth
   //@access Public
-  login: asyncHandler(async (req, res, next) => {
+  login: asyncHandler(async (req, res) => {
     const { username, password } = req.body;
 
     if (!username || !password) {
@@ -21,8 +32,10 @@ module.exports = {
       },
     });
 
-    if (!foundUser || !foundUser.project_member_active) {
-      return res.status(401).json({ message: "User not found: UnAuthorized" });
+    if (!foundUser || !foundUser.project_member_isActive) {
+      return res
+        .status(401)
+        .json({ message: "User not found or not active: UnAuthorized" });
     }
 
     const matchUser = await bcrypt.compare(
@@ -44,7 +57,7 @@ module.exports = {
       },
       process.env.ACCESS_TOKEN_SECRETKEY,
       {
-        expiresIn: "15s",
+        expiresIn: "1m",
       }
     );
 
@@ -55,15 +68,15 @@ module.exports = {
       },
       process.env.REFRESH_TOKEN_SECRETKEY,
       {
-        expiresIn: "15s",
+        expiresIn: "1m",
       }
     );
 
     res.cookie("jwt", refreshToken, {
       httpOnly: true,
-      secure: true,
+      // secure: true,
       sameSite: "None",
-      maxAge: 60 * 60 * 1000,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     res.json({ accessToken });
@@ -73,20 +86,19 @@ module.exports = {
   //@route POST /auth/logout
   //@access Public
   logout: asyncHandler(async (req, res, next) => {
-
     const cookies = req.cookies;
 
-    if(!cookies?.jwt) {
+    if (!cookies?.jwt) {
       return res.status(204);
     }
 
-    res.clearCookie('jwt', {
+    res.clearCookie("jwt", {
       httpOnly: true,
-      sameSite: 'None',
-      secure: true
+      sameSite: "None",
+      secure: true,
     });
 
-    res.json({message: 'cookie cleared successfully'});
+    res.json({ message: "cookie cleared successfully" });
   }),
 
   //@desc Refresh
@@ -95,8 +107,13 @@ module.exports = {
   refresh: asyncHandler(async (req, res, next) => {
     const cookies = req.cookies;
 
+    console.log(cookies);
+    console.log(cookies?.jwt);
+
     if (!cookies?.jwt) {
-      return res.status(401).json({ message: "No jwt : UnAuthorized" });
+      return res
+        .status(401)
+        .json({ message: "No cookie in the header : UnAuthorized" });
     }
 
     const refreshToken = cookies.jwt;
@@ -130,7 +147,7 @@ module.exports = {
           },
           process.env.ACCESS_TOKEN_SECRETKEY,
           {
-            expiresIn: "20m",
+            expiresIn: "1m",
           }
         );
 
