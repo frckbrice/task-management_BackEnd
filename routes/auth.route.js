@@ -33,6 +33,10 @@ router
   .post(authController.logout);
 
 router
+  .route("/register")
+  .post(authController.register);
+
+router
   .route("/refresh")
   .get(authController.refresh);
 

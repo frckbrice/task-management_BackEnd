@@ -27,7 +27,7 @@ module.exports = (sequelize, DataTypes) => {
     endDate: {
       type: DataTypes.DATE,
       get() {
-        const completed = this.getDataValue("task_completed");
+        const completed = this.getDataValue("completed");
 
         return completed ? new Date() : null;
       },

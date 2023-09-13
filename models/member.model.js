@@ -49,8 +49,6 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: true,
       },
     },
-    /* "username":"tato@gmail.com",
-  "password":"test123"*/
     {
       validate: {
         usernamePassMatch() {

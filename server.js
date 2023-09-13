@@ -10,6 +10,7 @@ const cookieParser = require("cookie-parser");
 const path = require("path");
 const db = require("./models");
 const passport = require("passport");
+const cookieSession = require('cookie-session')
 
 const PORT = process.env.PORT || 4000;
 const app = express();
@@ -17,6 +18,7 @@ const app = express();
 app.use(logger);
 app.use(cors(corsOptions));
 
+require("./auth/passport");
 require('./auth/passportGoogleSSO');
 
 app.use(express.json());
@@ -34,11 +36,18 @@ app.use("/auth", require("./routes/auth.route"));
 
 app.use(
   require("express-session")({
-    secret: "keyboard cat",
+    secret: process.env.JWT_SECRET,
     resave: true,
     saveUninitialized: true,
   })
 );
+
+// app.use(
+//   cookieSession({
+//     maxAge: 24 * 60 * 60 * 1000,
+//     keys: process.env.JWT_SECRET,
+//   })
+// );
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -47,7 +56,7 @@ app.use(errorHandler);
 
 (async () => {
   await db.sequelize
-    .sync({ alter: true })
+    .sync({ force: true })
     .then(() => {
       console.log("database connected successfully");
     })

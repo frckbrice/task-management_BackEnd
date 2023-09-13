@@ -1,4 +1,4 @@
-const {Member} = require("../models").models;
+const {Member, EmailAddress} = require("../models").models;
 // require("dotenv").config();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -11,36 +11,75 @@ module.exports = {
   //@access Public
 
   register: asyncHandler(async(req, res) => {
-      
+      const {username, email, password, confirmPassword} = req.body;
 
+      if(!username || !password || !email) {
+        return res.status(400).json({message: 'All fields are required'});
+      }
 
+      const duplicates = await EmailAddress.findOne({
+        where: {
+          designation: email,
+        },
+      });
+
+       const provider = email.split("@")[1].split('.')[0];
+      if(duplicates){
+        return res.status(409).json({message:'this email is already in use'});
+      }
+
+      const hashPwd = await bcrypt.hash(password, 10);
+
+      const registeredUser = await Member.create({
+        username,
+        password: hashPwd,
+        isActive: true,
+      });
+
+      if(registeredUser) {
+        await EmailAddress.create({
+          designation: email,
+          provider,
+          projectMemberId: registeredUser.id,
+        });
+      }
+        
   }),
 
   //@desc Login
   //@route POST /auth
   //@access Public
   login: asyncHandler(async (req, res) => {
-    const { username, password } = req.body;
+    const { email, password } = req.body;
 
-    if (!username || !password) {
+    if (!email || !password) {
       return res.status(400).json({ message: "All the fields are required" });
     }
 
-    const foundUser = await Member.findOne({
+    const existingEmail = await EmailAddress.findOne({
       where: {
-        project_member_username: username,
+        designation: email,
       },
     });
 
-    if (!foundUser || !foundUser.project_member_isActive) {
+    if (!existingEmail) {
       return res
         .status(401)
-        .json({ message: "User not found or not active: UnAuthorized" });
+        .json({ message: "User with this email not found: UnAuthorized!" });
+    }
+
+    const foundUser = Member.findById(existingEmail.projectMemberId);
+
+    //* is active is usefull to deactivate/remove a user from the app project
+    if(!foundUser || !foundUser.isActive) {
+      return res
+        .status(401)
+        .json({ message: "User not found or inactive: UnAuthorized!" });
     }
 
     const matchUser = await bcrypt.compare(
       password,
-      foundUser.project_member_password
+      foundUser.password
     );
 
     if (!matchUser) {
@@ -51,8 +90,8 @@ module.exports = {
     const accessToken = jwt.sign(
       {
         userInfo: {
-          username: foundUser.project_member_username,
-          roles: foundUser.project_member_role,
+          username: foundUser.username,
+          roles: foundUser.role,
         },
       },
       process.env.ACCESS_TOKEN_SECRETKEY,
@@ -64,7 +103,7 @@ module.exports = {
     //*create refresh token
     const refreshToken = jwt.sign(
       {
-        username: foundUser.project_member_username,
+        username: foundUser.username,
       },
       process.env.REFRESH_TOKEN_SECRETKEY,
       {
@@ -128,7 +167,7 @@ module.exports = {
 
         const foundUser = await Member.findOne({
           where: {
-            project_member_username: decodedUserInfo.username,
+            username: decodedUserInfo.username,
           },
         });
 
@@ -141,8 +180,8 @@ module.exports = {
         const accessToken = jwt.sign(
           {
             userInfo: {
-              username: foundUser.project_member_username,
-              roles: foundUser.project_member_role,
+              username: foundUser.username,
+              roles: foundUser.role,
             },
           },
           process.env.ACCESS_TOKEN_SECRETKEY,

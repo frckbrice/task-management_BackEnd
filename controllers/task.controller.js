@@ -22,41 +22,41 @@ module.exports = {
   //access private
   createTask: async (req, res) => {
     const {
-      task_name,
-      task_description,
-      task_status,
-      task_startDate,
-      task_remarks,
+      name,
+      description,
+      status,
+      startDate,
+      remarks,
     } = req.body;
 
-    if (!task_name || !task_description || !task_status || !task_startDate) {
+    if (!name || !description || !status || !startDate) {
       return res.json({ message: "All fields are required" });
     }
 
     const duplicates = await Task.findOne({
       where: {
-        task_name,
+        name,
       },
     });
 
     if (duplicates) {
       console.log(duplicates);
-      return res.status(409).json({ message: `${task_name} already exists` });
+      return res.status(409).json({ message: `${name} already exists` });
     }
 
     const uniformTask = {
-      task_name,
-      task_description,
-      task_startDate,
-      task_remarks,
-      task_status,
+      name,
+      description,
+      startDate,
+      remarks,
+      status,
     };
 
     Task.create(uniformTask).then((data) => {
       if (data) {
         console.log(data);
         res.status(201).json({
-          message: `The task ${task_name} successfully created`,
+          message: `The task ${name} successfully created`,
           data,
         });
       } else {
@@ -71,20 +71,20 @@ module.exports = {
   updateTask: async (req, res) => {
     const {
       id,
-      task_name,
-      task_description,
-      task_startDate,
-      task_completed,
-      task_remarks,
-      task_status,
+      name,
+      description,
+      startDate,
+      completed,
+      remarks,
+      status,
     } = req.body;
 
     if (
       !id ||
-      !task_name ||
-      !task_status ||
-      !task_remarks ||
-      (task_completed && !Boolean(task_completed)) || !task_description
+      !name ||
+      !status ||
+      !remarks ||
+      (completed && !Boolean(completed)) || !description
     ) {
       return res.status(400).json({ message: "All the fields are required" });
     }
@@ -98,7 +98,7 @@ module.exports = {
     //find duplicates
     const duplicates = await Task.findOne({
       where: {
-        task_name,
+        name,
       },
     });
 
@@ -111,12 +111,12 @@ module.exports = {
 
    
 
-    existingTask.task_description = task_description;
+    existingTask.description = description;
 
-    existingTask.task_name = task_name;
-    existingTask.task_remarks = task_remarks;
-    existingTask.task_status = task_status;
-    existingTask.task_completed = task_completed;
+    existingTask.name = name;
+    existingTask.remarks = remarks;
+    existingTask.status = status;
+    existingTask.completed = completed;
 
     const updatedTask = await existingTask.save();
     if (updatedTask) res.json({ msg: `user successfully updated` });

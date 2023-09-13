@@ -17,16 +17,15 @@ passport.use(
     },
     asyncHandler(async (req, accessToken, refreshToken, profile, cb) => {
       const defaultMember = {
-        project_member_name: `${profile.name.givenName} ${profile.name.familyName}`,
-        project_member_username: profile.emails[0].value,
-        project_member_picture: profile.photos[0].value,
-        project_member_googleId: profile.id,
-        project_member_isActive: true,
+        name: `${profile.name.givenName} ${profile.name.familyName}`,
+        username: profile.emails[0].value,
+        picture: profile.photos[0].value,
+        googleId: profile.id,
       };
 
       const user = await Member.findOrCreate({
         where: {
-          project_member_googleId: profile.id,
+          googleId: profile.id,
         },
         default: defaultMember,
       });

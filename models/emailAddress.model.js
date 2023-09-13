@@ -20,5 +20,5 @@ module.exports = (sequelize, DataTypes) => {
     },
   });
 
-  return Address;
+  return EmailAddress;
 };

@@ -22,23 +22,23 @@ module.exports = {
   //access private
   createUpdate: async (req, res) => {
     const {
-      task_update_action,
+      action,
       update_description,
-      task_update_remarks,
+      remarks,
     } = req.body;
 
     if (
-      !task_update_action ||
+      !action ||
       !update_description ||
-      !task_update_remarks
+      !remarks
     ) {
       return res.json({ message: "All fields are required" });
     }
 
     const uniformUpdate = {
-      task_update_action,
+      action,
       update_description,
-      task_update_remarks,
+      remarks,
     };
 
     Updates.create(uniformUpdate).then((data) => {
@@ -60,16 +60,16 @@ module.exports = {
   updateUpdate: async (req, res) => {
     const {
       id,
-      task_update_action,
-      task_update_description,
-      task_update_remarks,
+      action,
+      description,
+      remarks,
     } = req.body;
 
     if (
       !id ||
-      !task_update_action ||
-      !task_update_description ||
-      !task_update_remarks
+      !action ||
+      !description ||
+      !remarks
     ) {
       return res.status(400).json({ message: "All the fields are required" });
     }
@@ -94,10 +94,10 @@ module.exports = {
     //     .json({ message: "duplicates update: same update name" });
     // }
 
-    existingUpdate.task_update_action = task_update_action;
+    existingUpdate.action = action;
 
-    existingUpdate.task_update_description = task_update_description;
-    existingUpdate.task_update_remarks = task_update_remarks;
+    existingUpdate.description = description;
+    existingUpdate.remarks = remarks;
 
     const updatedUpdate = await existingUpdate.save();
     if (updatedUpdate) res.json({ msg: `user successfully updated` });

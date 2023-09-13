@@ -12,7 +12,7 @@ module.exports = {
   getAllMembers: asyncHandler(async (req, res) => {
     Member.findAll({
       attributes: {
-        exclude: ["project_member_password"],
+        exclude: ["password"],
       },
     })
       .then((data) => {
@@ -32,29 +32,29 @@ module.exports = {
   //access private
   createMember: asyncHandler(async (req, res) => {
     const {
-      project_member_name,
-      project_member_contact,
-      project_member_username,
-      project_member_password,
-      project_member_skills,
-      project_member_role,
-      project_member_isActive,
-      project_member_picture,
+      name,
+      contact,
+      username,
+      password,
+      skills,
+      role,
+      isActive,
+      picture,
     } = req.body;
 
     if (
-      !project_member_username ||
-      !project_member_password ||
-      !project_member_role ||
-      !project_member_skills ||
-      !project_member_isActive
+      !username ||
+      !password ||
+      !role ||
+      !skills ||
+      !isActive
     ) {
       return res.json({ message: "All fields are required" });
     }
 
     const duplicates = await Member.findOne({
       where: {
-        project_member_username,
+        username,
       },
     })
 
@@ -62,13 +62,13 @@ module.exports = {
       console.log(duplicates);
       return res
         .status(409)
-        .json({ message: `${project_member_username} already exists` });
+        .json({ message: `${username} already exists` });
     }
 
-    // if (project_member_role !== "manager") {
+    // if (role !== "manager") {
     //   const manager = await Project.findOne({
     //     where: {
-    //       project_member_role: {
+    //       role: {
     //         [Op.eq]: "manager",
     //       },
     //     },
@@ -80,17 +80,17 @@ module.exports = {
     //   }
     // }
     //* hash password
-    const hashPw = await bcrypt.hash(project_member_password, 10);
+    const hashPw = await bcrypt.hash(password, 10);
 
     const uniformMember = {
-      project_member_isActive,
-      project_member_contact,
-      project_member_name,
-      project_member_password: hashPw,
-      project_member_role,
-      project_member_skills,
-      project_member_username,
-      project_member_picture,
+      isActive,
+      contact,
+      name,
+      password: hashPw,
+      role,
+      skills,
+      username,
+      picture,
     };
 
     Member.create(uniformMember)
@@ -98,7 +98,7 @@ module.exports = {
         if (data) {
           console.log(data);
           res.status(201).json({
-            message: `The user ${project_member_username} successfully created`,
+            message: `The user ${username} successfully created`,
             data,
           });
         } else {
@@ -113,21 +113,21 @@ module.exports = {
   updateMember: asyncHandler(async (req, res) => {
     const {
       id,
-      project_member_name,
-      project_member_contact,
-      project_member_username,
-      project_member_password,
-      project_member_skills,
-      project_member_role,
-      project_member_isActive,
-      project_member_picture,
+      name,
+      contact,
+      username,
+      password,
+      skills,
+      role,
+      isActive,
+      picture,
     } = req.body;
 
     if (
       !id ||
-      !project_member_username ||
-      !project_member_role ||
-      !Boolean(project_member_active)
+      !username ||
+      !role ||
+      !Boolean(active)
     ) {
       return res.status(400).json({ message: "All the fields are required" });
     }
@@ -141,7 +141,7 @@ module.exports = {
     //find duplicates
     const duplicates = await Member.findOne({
       where: {
-        project_member_username,
+        username,
       },
     })
 
@@ -151,18 +151,18 @@ module.exports = {
         .json({ message: "duplicates member: same username" });
     }
 
-    existingMember.project_member_isActive = project_member_isActive;
-    existingMember.project_member_contact = project_member_contact;
-    existingMember.project_member_name = project_member_name;
+    existingMember.isActive = isActive;
+    existingMember.contact = contact;
+    existingMember.name = name;
 
-    existingMember.project_member_role = project_member_role;
-    existingMember.project_member_skills = project_member_skills;
-    existingMember.project_member_username = project_member_username;
-    existingMember.project_member_picture = project_member_picture;
+    existingMember.role = role;
+    existingMember.skills = skills;
+    existingMember.username = username;
+    existingMember.picture = picture;
 
-    if (project_member_password) {
-      existingMember.project_member_password = await bcrypt.hash(
-        project_member_password,
+    if (password) {
+      existingMember.password = await bcrypt.hash(
+        password,
         10
       );
     }

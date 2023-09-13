@@ -41,10 +41,10 @@ module.exports = {
 
     const projectMember = (
       await projectTeam.getMembers({
-        attributes: ["project_member_username"],
+        attributes: ["username"],
         raw: true,
       })
-    ).map((member) => member.project_member_username);
+    ).map((member) => member.username);
 
     if (!projectMember.length)
       return res
@@ -52,7 +52,7 @@ module.exports = {
         .json({ message: "This project team doesn't have members" });
 
     res.json({
-      message: `List of member associated ${targetProject.project_name}`,
+      message: `List of member associated ${targetProject.name}`,
       projectMember,
     });
   },
@@ -62,29 +62,29 @@ module.exports = {
   //access private
   createProject: async (req, res) => {
     const {
-      project_name,
-      project_description,
-      project_banner,
-      project_startDate,
-      project_endDate,
-      project_remarks,
-      project_status,
+      name,
+      description,
+      banner,
+      startDate,
+      endDate,
+      remarks,
+      status,
     } = req.body;
 
     if (
-      !project_name ||
-      !project_description ||
-      !project_status ||
-      !project_banner ||
-      !project_startDate ||
-      !project_endDate
+      !name ||
+      !description ||
+      !status ||
+      !banner ||
+      !startDate ||
+      !endDate
     ) {
       return res.json({ message: "All fields are required" });
     }
 
     const duplicates = await Project.findOne({
       where: {
-        project_name,
+        name,
       },
     });
 
@@ -92,24 +92,24 @@ module.exports = {
       console.log(duplicates);
       return res
         .status(409)
-        .json({ message: `${project_name} already exists` });
+        .json({ message: `${name} already exists` });
     }
 
     const uniformProject = {
-      project_name,
-      project_description,
-      project_banner,
-      project_startDate,
-      project_endDate,
-      project_remarks,
-      project_status,
+      name,
+      description,
+      banner,
+      startDate,
+      endDate,
+      remarks,
+      status,
     };
 
     Project.create(uniformProject).then((data) => {
       if (data) {
         console.log(data);
         res.status(201).json({
-          message: `The project ${project_name} successfully created`,
+          message: `The project ${name} successfully created`,
           data,
         });
       } else {
@@ -125,16 +125,16 @@ module.exports = {
     const {
       id,
 
-      project_name,
-      project_description,
-      project_banner,
-      project_startDate,
-      project_completed,
-      project_remarks,
-      project_status,
+      name,
+      description,
+      banner,
+      startDate,
+      completed,
+      remarks,
+      status,
     } = req.body;
 
-    if (!id || !project_name || !project_status || !project_remarks) {
+    if (!id || !name || !status || !remarks) {
       return res.status(400).json({ message: "All the fields are required" });
     }
 
@@ -147,7 +147,7 @@ module.exports = {
     //find duplicates
     const duplicates = await Project.findOne({
       where: {
-        project_name,
+        name,
       },
     });
 
@@ -157,13 +157,13 @@ module.exports = {
         .json({ message: "duplicates project: same username" });
     }
 
-    existingProject.project_banner = project_banner;
+    existingProject.banner = banner;
 
-    existingProject.project_description = project_description;
+    existingProject.description = description;
 
-    existingProject.project_name = project_name;
-    existingProject.project_remarks = project_remarks;
-    existingProject.project_status = project_status;
+    existingProject.name = name;
+    existingProject.remarks = remarks;
+    existingProject.status = status;
 
     const updatedProject = await existingProject.save();
     if (updatedProject) res.json({ msg: `user successfully updated` });
