@@ -11,9 +11,11 @@ module.exports = {
   //@access Public
 
   register: asyncHandler(async(req, res) => {
-      const {username, email, password, confirmPassword} = req.body;
+      const {username, email, password, picture, id} = req.body;
 
-      if(!username || !password || !email) {
+    console.log({ username, email, password,  picture });
+
+      if(!username || !email) {
         return res.status(400).json({message: 'All fields are required'});
       }
 
@@ -27,13 +29,16 @@ module.exports = {
       if(duplicates){
         return res.status(409).json({message:'this email is already in use'});
       }
-
-      const hashPwd = await bcrypt.hash(password, 10);
+      if(password) {
+        const hashPwd = await bcrypt.hash(password, 10);
+      }
 
       const registeredUser = await Member.create({
         username,
-        password: hashPwd,
+        password: password ? hashPwd : '',
         isActive: true,
+        picture: picture ? picture: '',
+        googleId: id ? id: '',
       });
 
       if(registeredUser) {
@@ -42,6 +47,8 @@ module.exports = {
           provider,
           projectMemberId: registeredUser.id,
         });
+
+        res.status(201).json(registeredUser,  email);
       }
         
   }),

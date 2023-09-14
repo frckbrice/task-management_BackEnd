@@ -10,18 +10,25 @@ const cookieParser = require("cookie-parser");
 const path = require("path");
 const db = require("./models");
 const passport = require("passport");
-const cookieSession = require('cookie-session')
+const session = require("express-session");
+const uuid = require("uuid").v4;
+const verifyJwt = require("./middleware/verifyJwt");
 
 const PORT = process.env.PORT || 4000;
 const app = express();
+
 
 app.use(logger);
 app.use(cors(corsOptions));
 
 require("./auth/passport");
-require('./auth/passportGoogleSSO');
+require("./auth/passportGoogleSSO");
 
-app.use(express.json());
+app.use(
+  express.json({
+    type: ["application/json", "text/plain"],
+  })
+);
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
@@ -34,20 +41,22 @@ app.use("/updates", require("./routes/updates.routes"));
 app.use("/teams", require("./routes/team.routes"));
 app.use("/auth", require("./routes/auth.route"));
 
+app.use(require("serve-static")(__dirname + "/../../public"));
+
+// add & configure middleware
 app.use(
-  require("express-session")({
-    secret: process.env.JWT_SECRET,
-    resave: true,
+  session({
+    genid: (req) => {
+      console.log("Inside the session middleware");
+      console.log(req.sessionID);
+      return uuid(); // use UUIDs for session IDs
+    },
+    secret: "keyboard cat",
+    resave: false,
     saveUninitialized: true,
   })
 );
 
-// app.use(
-//   cookieSession({
-//     maxAge: 24 * 60 * 60 * 1000,
-//     keys: process.env.JWT_SECRET,
-//   })
-// );
 app.use(passport.initialize());
 app.use(passport.session());
 

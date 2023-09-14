@@ -13,6 +13,9 @@ router
   .patch(memberController.updateMember)
   .delete(memberController.deleteMember)
 
+router
+  .get('/user', memberController.googleinvitedMember);
+
 
 
   module.exports = router;
