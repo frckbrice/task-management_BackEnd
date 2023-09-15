@@ -114,6 +114,8 @@ module.exports = {
         userInfo: {
           username: foundUser.username,
           roles: foundUser.role,
+          email: existingEmail.designation,
+          picture: foundUser.picture
         },
       },
       process.env.ACCESS_TOKEN_SECRETKEY,
@@ -122,7 +124,7 @@ module.exports = {
       }
     );
 
-    //*create refresh token
+    //*create refresh token on backend
     const refreshToken = jwt.sign(
       {
         username: foundUser.username,
