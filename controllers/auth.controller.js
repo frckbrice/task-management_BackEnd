@@ -114,6 +114,8 @@ module.exports = {
         userInfo: {
           username: foundUser.username,
           roles: foundUser.role,
+          email: existingEmail.designation,
+          picture: foundUser.picture
         },
       },
       process.env.ACCESS_TOKEN_SECRETKEY,
