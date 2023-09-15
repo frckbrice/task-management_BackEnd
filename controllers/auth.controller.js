@@ -124,7 +124,7 @@ module.exports = {
       }
     );
 
-    //*create refresh token
+    //*create refresh token on backend
     const refreshToken = jwt.sign(
       {
         username: foundUser.username,
