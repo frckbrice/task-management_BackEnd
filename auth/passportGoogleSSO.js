@@ -10,8 +10,8 @@ const GOOGLE_CALLBACK_URL = "http://localhost:5000/auth/google/callback";
 passport.use(
   new GoogleStrategy( // Password123#@!
     {
-      clientID: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      clientID: "406422802452-7hvk8l96vt3p0vv7o90ho5lihpgmpg34.apps.googleusercontent.com",
+      clientSecret: "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",
       callbackURL: GOOGLE_CALLBACK_URL,
       passReqToCallback: true,
     },
