@@ -29,8 +29,8 @@ module.exports = {
       remarks,
     } = req.body;
 
-    if (!name || !description || !status || !startDate) {
-      return res.json({ message: "All fields are required" });
+    if (!name) {
+      return res.json({ message: "The name field is required" });
     }
 
     const duplicates = await Task.findOne({
@@ -50,6 +50,7 @@ module.exports = {
       startDate,
       remarks,
       status,
+      projectId: req.user.projectId // assuming you have a user object with projectId
     };
 
     Task.create(uniformTask).then((data) => {
