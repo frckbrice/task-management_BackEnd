@@ -1,43 +1,52 @@
 module.exports = (sequelize, DataTypes) => {
   const Member = sequelize.define(
-    "project_member",
+    "projectMember",
     {
       id: {
         type: DataTypes.UUID,
+        allowNull: false,
         defaultValue: DataTypes.UUIDV4,
         primaryKey: true,
-        allowNull: false,
       },
-      project_member_code: {
+      name: {
         type: DataTypes.STRING,
+        allowNull: true,
       },
+      contact: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      username: {
+        type: DataTypes.STRING,
 
-      project_member_name: {
-        type: DataTypes.STRING,
-      },
-      project_member_contact: {
-        type: DataTypes.STRING,
-      },
-      project_member_email: {
-        type: DataTypes.STRING,
-        validate: {
-          isEmail: true,
+        get() {
+          const rawValue = this.getDataValue("username");
+          return rawValue ? rawValue.toLowerCase() : "Unknown Member";
         },
       },
-      project_member_username: {
+      password: {
         type: DataTypes.STRING,
       },
-      project_member_password: {
-        type: DataTypes.STRING,
-      },
-      project_member_status: {
-        type: DataTypes.STRING,
-      },
-      project_member_startingDate: {
-        type: DataTypes.STRING,
-      },
-      project_member_skills: {
+      skills: {
         type: DataTypes.TEXT,
+        allowNull: true,
+      },
+      role: {
+        type: DataTypes.ENUM("admin", "manager", "invitie"),
+        allowNull: false,
+        defaultValue: "manager",
+      },
+      isActive: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true,
+      },
+      picture: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      googleId: {
+        type: DataTypes.STRING,
+        allowNull: true,
       },
     },
     {

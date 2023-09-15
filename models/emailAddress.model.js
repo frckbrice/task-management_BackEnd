@@ -1,31 +1,24 @@
-const Member = require('./member.model')
+const Member = require("./member.model");
 
 module.exports = (sequelize, DataTypes) => {
-  const Updates = sequelize.define("taskUpdate", {
-    id: {
+  const EmailAddress = sequelize.define("emailAddress", {
+    token: {
       type: DataTypes.UUID,
       primaryKey: true,
       allowNull: false,
       defaultValue: DataTypes.UUIDV4,
     },
-    action: {
+    designation: {
       type: DataTypes.STRING,
     },
-    description: {
-      type: DataTypes.TEXT,
-    },
-    remarks: {
+    provider: {
       type: DataTypes.STRING,
     },
     projectMemberId: {
       type: DataTypes.UUID,
       allowNull: false,
     },
-    taskId: {
-      type: DataTypes.UUID,
-      allowNull: false,
-    },
   });
 
-  return Updates;
+  return EmailAddress;
 };

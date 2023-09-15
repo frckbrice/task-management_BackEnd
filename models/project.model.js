@@ -1,34 +1,46 @@
 const { DataTypes } = require("sequelize");
-
+const Member = require('./member.model')
 module.exports = (sequelize, DataTypes) => {
   const Project = sequelize.define("project", {
     id: {
       type: DataTypes.UUID,
       primaryKey: true,
+      defaultValue: DataTypes.UUIDV4,
       allowNull: false,
     },
-    project_code: {
+    name: {
       type: DataTypes.STRING,
     },
-    project_name: {
+    description: {
+      type: DataTypes.TEXT,
+    },
+    banner: {
       type: DataTypes.STRING,
     },
-    project_description: {
+    startDate: {
+      type: DataTypes.DATE,
+    },
+    estimateEndDate: {
+      type: DataTypes.DATE,
+    },
+    completed: DataTypes.BOOLEAN,
+    endDate: {
+      type: DataTypes.DATE,
+      get() {
+        const completed = this.getDataValue("completed");
+
+        return completed ? new Date() : null;
+      },
+    },
+    remarks: {
       type: DataTypes.STRING,
     },
-    project_banner: {
-      type: DataTypes.STRING,
+    status: DataTypes.STRING,
+    projectManagerId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      
     },
-    project_startDate: {
-      type: DataTypes.DATEONLY,
-    },
-    project_endDate: {
-      type: DataTypes.DATEONLY,
-    },
-    project_remarks: {
-      type: DataTypes.STRING,
-    },
-    project_status: DataTypes.STRING,
   });
 
   return Project;
