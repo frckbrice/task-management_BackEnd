@@ -74,7 +74,9 @@ module.exports = {
     }
 
     const existingEmail = await EmailAddress.findOne({
-      designation: `${email}`,
+      where: {
+        designation: email,
+      },
     });
 
     console.log("existingEmail: ", existingEmail);
@@ -88,7 +90,7 @@ module.exports = {
 
     //look for the person owner of that email
     const foundUser = await Member.findByPk(existingEmail.projectMemberId);
-    console.log('found user: ', foundUser)
+    console.log("found user: ", foundUser);
     //* is active is usefull to deactivate/remove a user from the app project
     if (!foundUser || !foundUser.isActive) {
       console.log("%c not existing emailOwner: UnAuthorized", "tomato");
@@ -100,7 +102,7 @@ module.exports = {
     let matchUser;
     if (password) {
       matchUser = await bcrypt.compare(password, foundUser.password);
-   console.log("%c not emailOwner with password: UnAuthorized", "tomato");
+      console.log("%c not emailOwner with password: UnAuthorized", "tomato");
       if (!matchUser) {
         return res.status(401).json({ message: "NO match: UnAuthorized" });
       }
