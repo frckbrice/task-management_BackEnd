@@ -14,6 +14,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     status: {
       type: DataTypes.STRING,
+      defaultValue: 'todo'
     },
     startdate: {
       type: DataTypes.STRING,

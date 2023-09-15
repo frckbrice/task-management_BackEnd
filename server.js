@@ -70,7 +70,7 @@ app.use(errorHandler);
       console.log("database connected successfully");
     })
     .catch(function (err) {
-      console.log("Failed to connect to MYSQL DATABASE", err.message);
+      console.log("\n\nFailed to connect to MYSQL DATABASE\n\n", err);
       logEvents(
         `${err.no}:${err.message}\t${err.syscall}\t${err.hostname}`,
         "sequelErrLog.log"

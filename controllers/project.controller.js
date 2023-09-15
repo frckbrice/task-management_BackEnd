@@ -12,7 +12,7 @@ module.exports = {
     Project.findAll().then((data) => {
       console.log(data);
       if (!data.length)
-        return res.status(400).json({ message: "No project found" });
+        return res.status(400).json({ message: "No projects found" });
       res.json(data);
     });
   },
@@ -21,10 +21,10 @@ module.exports = {
   //@route GET /project/members
   //access Private
   getProjectMembers: async (req, res) => {
+    // get the id of the project
     const { id } = req.body;
 
-    if (!id)
-      return res.status(400).json({ message: " Id is needed" });
+    if (!id) return res.status(400).json({ message: " Id is needed" });
 
     // const targetProject = await Project.findByPk(id, {
     //   include: Team,
@@ -49,10 +49,10 @@ module.exports = {
     if (!projectMember.length)
       return res
         .status(404)
-        .json({ message: "This project team doesn't have members" });
+        .json({ message: "This project's team doesn't have members" });
 
     res.json({
-      message: `List of member associated ${targetProject.name}`,
+      message: `List of member associated to project${targetProject.name}`,
       projectMember,
     });
   },
@@ -61,38 +61,18 @@ module.exports = {
   //@route POST /project
   //access private
   createProject: async (req, res) => {
-    const {
-      name,
-      description,
-      banner,
-      startDate,
-      endDate,
-      remarks,
-      status,
-    } = req.body;
+    const { name, description, banner, startDate, endDate, remarks } =
+      req.body;
 
-    if (
-      !name ||
-      !description ||
-      !status ||
-      !banner ||
-      !startDate ||
-      !endDate
-    ) {
+    if (!name || !description) {
       return res.json({ message: "All fields are required" });
     }
 
-    const duplicates = await Project.findOne({
-      where: {
-        name,
-      },
-    });
+    const duplicates = await Project.findOne({ name });
 
     if (duplicates) {
       console.log(duplicates);
-      return res
-        .status(409)
-        .json({ message: `${name} already exists` });
+      return res.status(409).json({ message: `${name} already exists` });
     }
 
     const uniformProject = {
@@ -100,9 +80,8 @@ module.exports = {
       description,
       banner,
       startDate,
-      endDate,
+      estimateEndDate,
       remarks,
-      status,
     };
 
     Project.create(uniformProject).then((data) => {
@@ -124,17 +103,15 @@ module.exports = {
   updateProject: async (req, res) => {
     const {
       id,
-
       name,
       description,
       banner,
-      startDate,
       completed,
       remarks,
-      status,
+      projectProgress,
     } = req.body;
 
-    if (!id || !name || !status || !remarks) {
+    if (!id || !name || !projectProgress || !remarks) {
       return res.status(400).json({ message: "All the fields are required" });
     }
 
@@ -163,7 +140,7 @@ module.exports = {
 
     existingProject.name = name;
     existingProject.remarks = remarks;
-    existingProject.status = status;
+    existingProject.projectProgress = projectProgress;
 
     const updatedProject = await existingProject.save();
     if (updatedProject) res.json({ msg: `user successfully updated` });
