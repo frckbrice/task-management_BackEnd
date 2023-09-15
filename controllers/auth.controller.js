@@ -116,7 +116,7 @@ module.exports = {
       },
       process.env.ACCESS_TOKEN_SECRETKEY,
       {
-        expiresIn: "1m",
+        expiresIn: "20m",
       }
     );
 
@@ -127,7 +127,7 @@ module.exports = {
       },
       process.env.REFRESH_TOKEN_SECRETKEY,
       {
-        expiresIn: "1m",
+        expiresIn: "7d",
       }
     );
 
@@ -206,7 +206,7 @@ module.exports = {
           },
           process.env.ACCESS_TOKEN_SECRETKEY,
           {
-            expiresIn: "1m",
+            dexpiresIn: "20m",
           }
         );
 
