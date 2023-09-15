@@ -68,7 +68,9 @@ module.exports = {
       return res.json({ message: "All fields are required" });
     }
 
-    const duplicates = await Project.findOne({ name });
+    const duplicates = await Project.findOne({ where: {
+      name
+    } });
 
     if (duplicates) {
       console.log(duplicates);
