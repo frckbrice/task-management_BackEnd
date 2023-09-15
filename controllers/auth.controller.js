@@ -1,56 +1,66 @@
-const {Member, EmailAddress} = require("../models").models;
+const { Member, EmailAddress } = require("../models").models;
 // require("dotenv").config();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const asyncHandler = require('express-async-handler');
-const passport = require('passport');
+const asyncHandler = require("express-async-handler");
+const passport = require("passport");
 
 module.exports = {
   //@desc register
   //@route POST /register
   //@access Public
 
-  register: asyncHandler(async(req, res) => {
-      const {username, email, password, picture, id} = req.body;
+  register: asyncHandler(async (req, res) => {
+    const { username, email, password, picture, id } = req.body;
 
-    console.log({ username, email, password,  picture });
+    console.log({ username, email, password, picture });
 
-      if(!username || !email) {
-        return res.status(400).json({message: 'All fields are required'});
-      }
+    if (!username || !email) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
 
-      const duplicates = await EmailAddress.findOne({
-        where: {
-          designation: email,
-        },
+    const duplicates = await EmailAddress.findOne({
+      where: {
+        designation: email,
+      },
+    });
+
+    const emailProvider = email.split("@")[1].split(".")[0];
+
+    console.log("emailProvider: ", emailProvider);
+
+    if (duplicates) {
+      return res.status(409).json({ message: "this email is already in use" });
+    }
+
+    let hashPwd;
+    if (password) {
+      hashPwd = await bcrypt.hash(password, 10);
+    }
+
+    let registeredUser = await Member.create({
+      username,
+      password: password ? hashPwd : "",
+      isActive: true,
+      picture: picture ? picture : "",
+      googleId: id ? id : "",
+    });
+
+    if (registeredUser) {
+      const newEmail = await EmailAddress.create({
+        designation: email,
+        provider: `from ${emailProvider} provider`,
+        projectMemberId: registeredUser.id,
       });
 
-       const provider = email.split("@")[1].split('.')[0];
-      if(duplicates){
-        return res.status(409).json({message:'this email is already in use'});
+      if (newEmail) {
+        console.log(newEmail);
       }
-      if(password) {
-        const hashPwd = await bcrypt.hash(password, 10);
-      }
+      console.log("emailProvider: ", emailProvider);
 
-      const registeredUser = await Member.create({
-        username,
-        password: password ? hashPwd : '',
-        isActive: true,
-        picture: picture ? picture: '',
-        googleId: id ? id: '',
-      });
-
-      if(registeredUser) {
-        await EmailAddress.create({
-          designation: email,
-          provider,
-          projectMemberId: registeredUser.id,
-        });
-
-        res.status(201).json(registeredUser,  email);
-      }
-        
+      console.log(registeredUser);
+      res.status(201).json({ ...registeredUser, email });
+    }
   }),
 
   //@desc Login
@@ -58,39 +68,42 @@ module.exports = {
   //@access Public
   login: asyncHandler(async (req, res) => {
     const { email, password } = req.body;
-
-    if (!email || !password) {
+    console.log(email, password);
+    if (!email) {
       return res.status(400).json({ message: "All the fields are required" });
     }
 
     const existingEmail = await EmailAddress.findOne({
-      where: {
-        designation: email,
-      },
+      designation: `${email}`,
     });
 
+    console.log("existingEmail: ", existingEmail);
+
     if (!existingEmail) {
+      console.log("%c not existing emailaddress: UnAuthorized", "tomato");
       return res
         .status(401)
         .json({ message: "User with this email not found: UnAuthorized!" });
     }
 
-    const foundUser = Member.findById(existingEmail.projectMemberId);
-
+    //look for the person owner of that email
+    const foundUser = await Member.findByPk(existingEmail.projectMemberId);
+    console.log('found user: ', foundUser)
     //* is active is usefull to deactivate/remove a user from the app project
-    if(!foundUser || !foundUser.isActive) {
+    if (!foundUser || !foundUser.isActive) {
+      console.log("%c not existing emailOwner: UnAuthorized", "tomato");
       return res
         .status(401)
         .json({ message: "User not found or inactive: UnAuthorized!" });
     }
 
-    const matchUser = await bcrypt.compare(
-      password,
-      foundUser.password
-    );
-
-    if (!matchUser) {
-      return res.status(401).json({ message: "NO match: UnAuthorized" });
+    let matchUser;
+    if (password) {
+      matchUser = await bcrypt.compare(password, foundUser.password);
+   console.log("%c not emailOwner with password: UnAuthorized", "tomato");
+      if (!matchUser) {
+        return res.status(401).json({ message: "NO match: UnAuthorized" });
+      }
     }
 
     //*create token
