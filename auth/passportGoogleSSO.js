@@ -8,7 +8,7 @@ const { Member } = require("../models").models;
 const GOOGLE_CALLBACK_URL = "http://localhost:5000/auth/google/callback";
 
 passport.use(
-  new GoogleStrategy(
+  new GoogleStrategy( // Password123#@!
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,

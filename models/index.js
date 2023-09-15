@@ -5,7 +5,7 @@ const dbConfig = require("../config/db.config");
 const sequelize = new Sequelize(dbConfig.DB, dbConfig.USER, dbConfig.PASSWORD, {
   host: dbConfig.HOST,
   dialect: dbConfig.DIALECT,
-
+  PORT: 3306,
   define: {
     //   freezeTableName: true,
     paranoid: true,
