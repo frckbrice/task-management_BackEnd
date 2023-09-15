@@ -18,8 +18,8 @@ router
 router.route("/google/callback").get(
   passport.authenticate("google", {
     failureMessage: " cannot login with google, please try again later!",
-    failureRedirect: "http://localhost:3000/signup",
-    successRedirect: "http://localhost:3000/dashboard",
+    failureRedirect: "https://tms-gdb08-0923.onrender.com/signup",
+    successRedirect: "https://tms-gdb08-0923.onrender.com/dashboard",
   }),
   (req, res) => {
     console.log("User: " + req.user);
