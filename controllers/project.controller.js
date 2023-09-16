@@ -1,4 +1,5 @@
-const { Project, Member, Team, Task } = require("../models").models;
+const { Project, Member, Team, Task, EmailAddress } =
+  require("../models").models;
 const { Op } = require("sequelize");
 
 const bcrypt = require("bcrypt");
@@ -61,21 +62,38 @@ module.exports = {
   //@route POST /project
   //access private
   createProject: async (req, res) => {
-    const { name, description, banner, startDate, endDate, remarks } =
+    const { name, description, banner, startDate, estimateEndDate, remarks } =
       req.body;
 
-    if (!name || !description) {
+    // const { email } = req.user;
+
+    if (!name || !description || !estimateEndDate || !startDate) {
       return res.json({ message: "All fields are required" });
     }
 
-    const duplicates = await Project.findOne({ where: {
-      name
-    } });
+    console.log({user: req.user})
+
+    let existingEmail;
+   
+      existingEmail = await EmailAddress.findOne({
+        where: {
+          designation: req.user,
+        },
+      });
+    
+console.log({ pm:existingEmail.projectMemberId });
+    const duplicates = await Project.findOne({
+      where: {
+        name,
+      },
+    });
 
     if (duplicates) {
-      console.log(duplicates);
+      console.log({duplicates});
       return res.status(409).json({ message: `${name} already exists` });
     }
+
+    let  pmId  = existingEmail.projectMemberId;
 
     const uniformProject = {
       name,
@@ -86,7 +104,9 @@ module.exports = {
       remarks,
     };
 
-    Project.create(uniformProject).then((data) => {
+
+
+    Project.create({ ...uniformProject, projectManagerId: pmId }).then((data) => {
       if (data) {
         console.log(data);
         res.status(201).json({
