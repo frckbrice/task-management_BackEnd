@@ -12,8 +12,7 @@ passport.use(
   new StrategyJwt(
     {
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey:
-        "8a21a81ed494fb855e95a26ebc4094558952901de5a5563cc622a0e518349f32dd7a2e34d8f3a9880c478675d05f0c54f798efc47fdbaa8a338b02ba2001dcb3",
+      secretOrKey:"8a21a81ed494fb855e95a26ebc4094558952901de5a5563cc622a0e518349f32dd7a2e34d8f3a9880c478675d05f0c54f798efc47fdbaa8a338b02ba2001dcb3",
     },
     (jwtPayload, done) => {
       console.log(jwtPayload);

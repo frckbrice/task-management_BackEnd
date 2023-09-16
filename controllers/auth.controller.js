@@ -102,7 +102,7 @@ module.exports = {
     let matchUser;
     if (password) {
       matchUser = await bcrypt.compare(password, foundUser.password);
-      console.log("%c not emailOwner with password: UnAuthorized", "tomato");
+      console.log("%c\n not emailOwner with password: UnAuthorized\n", "tomato");
       if (!matchUser) {
         return res.status(401).json({ message: "NO match: UnAuthorized" });
       }
@@ -114,7 +114,7 @@ module.exports = {
         userInfo: {
           username: foundUser.username,
           roles: foundUser.role,
-          email: existingEmail.designation,
+          email: email,
           picture: foundUser.picture
         },
       },
