@@ -21,13 +21,7 @@ module.exports = {
   //@route POST /tasks
   //access private
   createTask: async (req, res) => {
-    const {
-      name,
-      description,
-      status,
-      startDate,
-      remarks,
-    } = req.body;
+    const { name, description, status, startDate, remarks } = req.body;
 
     if (!name) {
       return res.json({ message: "The name field is required" });
@@ -50,7 +44,7 @@ module.exports = {
       startDate,
       remarks,
       status,
-      projectId: req.user.projectId // assuming you have a user object with projectId
+      projectId: req.user.projectId, // assuming you have a user object with projectId
     };
 
     Task.create(uniformTask).then((data) => {
@@ -70,22 +64,16 @@ module.exports = {
   //@route PATCH /task
   //access Private
   updateTask: async (req, res) => {
-    const {
-      id,
-      name,
-      description,
-      startDate,
-      completed,
-      remarks,
-      status,
-    } = req.body;
+    const { id, name, description, startDate, completed, remarks, status } =
+      req.body;
 
     if (
       !id ||
       !name ||
       !status ||
       !remarks ||
-      (completed && !Boolean(completed)) || !description
+      (completed && !Boolean(completed)) ||
+      !description
     ) {
       return res.status(400).json({ message: "All the fields are required" });
     }
@@ -104,13 +92,11 @@ module.exports = {
     });
 
     if (duplicates && duplicates.id.toString() !== id.toString()) {
-      console.log(duplicates)
+      console.log(duplicates);
       return res
         .status(409)
         .json({ message: "duplicates task: same task name" });
     }
-
-   
 
     existingTask.description = description;
 
