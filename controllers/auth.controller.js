@@ -127,6 +127,7 @@ const newEmail = await EmailAddress.build({
     if (!email || !password) {
       return res.status(400).json({ message: "All the fields are required" });
     }
+req.session.user = req.body;
 
     const existingEmail = await EmailAddress.findOne({
       where: {
@@ -172,7 +173,6 @@ const newEmail = await EmailAddress.build({
       username: foundUser?.username,
       roles: foundUser?.role,
       email: email,
-      picture: foundUser?.picture,
     };
 
     console.log({ userInfo });
@@ -319,7 +319,7 @@ const newEmail = await EmailAddress.build({
       process.env.REFRESH_TOKEN_SECRETKEY,
       async (err, decodedUserInfo) => {
         if (err) {
-          return res.status(403).json({ message: "refresh Forbidden" });
+          return res.status(403).json({ message: "Forbidden" });
         }
 
         const foundUser = await Member.findOne({

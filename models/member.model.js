@@ -48,6 +48,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: true,
       },
+      teamId: {
+        type: DataTypes.UUID,
+        allowNull: true,
+      },
     },
     {
       validate: {

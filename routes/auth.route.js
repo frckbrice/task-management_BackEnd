@@ -27,7 +27,9 @@ router.route("/google/callback").get(
   }
 );
 
-router.route("/login").post(loginLimiter, authController.login);
+router
+  .route("/login", passport.authenticate("local", { failureRedirect: "/" }))
+  .post(loginLimiter, authController.login);
 
 router.route("/googleLogin").post(loginLimiter, authController.googleLogin);
 

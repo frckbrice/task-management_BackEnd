@@ -62,7 +62,7 @@ module.exports = {
   //@route POST /project
   //access private
   createProject: async (req, res) => {
-    const { name, description, banner, startDate, estimateEndDate, remarks } =
+    const { name, description, banner, startDate, estimateEndDate, remarks, teamName } =
       req.body;
 
     // const { email } = req.user;
@@ -102,13 +102,27 @@ console.log({ pm:existingEmail.projectMemberId });
       remarks,
     };
 
-    Project.create({ ...uniformProject, projectManagerId: pmId }).then((data) => {
+    Project.create({ ...uniformProject, projectManagerId: pmId }).then(async(data) => {
       if (data) {
         console.log(data);
-        return res.status(201).json({
-          message: `The project ${name} successfully created`,
-          data,
-        });
+
+        // we create also a team that handle a project 
+        const newTeam = await Team.create({
+          name: teamName,
+          projectId: data.id 
+          
+        })
+
+        if(newTeam) {
+          console.log('\n\n team also created successfully');
+
+          return res.status(201).json({
+            message: `The project ${name} successfully created`,
+            data,
+          });
+        }
+
+        
       } else {
         return res.json({ message: "Failed to create project" });
       }

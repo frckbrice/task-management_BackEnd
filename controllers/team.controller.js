@@ -21,26 +21,26 @@ module.exports = {
   //@route POST /team
   //access private
   createTeam: async (req, res) => {
-    const { team_name, team_description, team_logo, team_color, team_status } =
+    const { name, description, logo, color, status } =
       req.body;
 
-    if (!team_name || !team_description || !team_status) {
+    if (!name || !description || !status) {
       return res.json({ message: "All fields are required" });
     }
 
     const uniformTeam = {
-      team_name,
-      team_description,
-      team_logo,
-      team_color,
-      team_status,
+      name,
+      description,
+      logo,
+      color,
+      status,
     };
 
     Team.create(uniformTeam).then((data) => {
       if (data) {
         console.log(data);
         res.status(201).json({
-          message: `The team ${team_name} successfully created`,
+          message: `The team ${name} successfully created`,
           data,
         });
       } else {
@@ -55,14 +55,14 @@ module.exports = {
   updateTeam: async (req, res) => {
     const {
       id,
-      team_name,
-      team_description,
-      team_logo,
-      team_color,
-      team_status,
+      name,
+      description,
+      logo,
+      color,
+      status,
     } = req.body;
 
-    if (!team_name || !team_description || !team_status) {
+    if (!name || !description || !status) {
       return res.status(400).json({ message: "All the fields are required" });
     }
 
@@ -75,7 +75,7 @@ module.exports = {
     //find duplicates
     const duplicates = await Team.findOne({
       where: {
-        team_name,
+        name,
       },
     });
 
@@ -84,11 +84,11 @@ module.exports = {
       return res.status(409).json({ message: "This team name already exists" });
     }
 
-    existingTeam.team_name = team_name;
-    existingTeam.team_description = team_description;
-    existingTeam.team_logo = team_logo;
-    existingTeam.team_status = team_status;
-    existingTeam.team_color = team_color;
+    existingTeam.name = name;
+    existingTeam.description = description;
+    existingTeam.logo = logo;
+    existingTeam.status = status;
+    existingTeam.color = color;
 
     const teamdTeam = await existingTeam.save();
     if (teamdTeam) res.json({ msg: `user successfully teamd` });

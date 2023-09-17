@@ -2,7 +2,7 @@ const { Task, Member, Invitation, Project, EmailAddress } =
   require("../models").models;
 const { Op } = require("sequelize");
 const nodemailer = require("nodemailer");
-
+const jwt = require("jsonwebtoken");
 const asyncHandler = require("express-async-handler");
 
 module.exports = {
@@ -25,8 +25,6 @@ module.exports = {
   createInvitation: asyncHandler(async (req, res) => {
     const { token, emails, emailContent } = req.body;
 
-    let inviteSent = false,
-      returnResult;
     console.log("\n\n in the create invitation");
     console.log({ token, emails, emailContent });
 
@@ -59,9 +57,10 @@ module.exports = {
       notified: true,
       content: emailContent,
       invitationEmail: emails,
-    });
-   console.log("\n\n after the level of invitation creation");
-    const pmId = newInvitation.pr
+    }).catch(err => console.log(err));
+
+    console.log("\n\n after the level of invitation creation");
+
     console.log("\n\n");
     console.log(newInvitation);
     console.log("\n");
@@ -78,6 +77,9 @@ module.exports = {
         });
     }
 
+   const newContent = `${emailContent}invitation/${newInvitation.id}`;
+
+console.log(newContent)
     const transporter = nodemailer.createTransport({
       service: "gmail",
       // host: "smtp.google.com",
@@ -93,7 +95,7 @@ module.exports = {
       from: "maebrie2017@gmail.com",
       to: emails,
       subject: `INVITATION TO TAKE PART TO THE PROJECT ${projectname}`,
-      text: `${prjectsummary} please click the following link to join the project ${emailContent}`,
+      text: `${prjectsummary} please click the following link to join the project ${newContent}`,
     };
 
     transporter.sendMail(mailOptions, (err, result) => {
@@ -177,5 +179,84 @@ module.exports = {
         .status(201)
         .json({ message: `The invitation with id ${id} deleted successfully` });
     }
+  }),
+
+  //@desc handle invitation
+  //@route GET /invitation/:id
+  //@access private
+
+  handleInvite: asyncHandler(async (req, res) => {
+    const { id } = req.params;
+
+    // fetch the invite for the token
+    const existingInvitation = await Invitation.findByPk(id);
+
+    if (!existingInvitation) {
+      console.log("this invitation doesn't exist");
+      return res.status(400).send({ message: " Invitation not valid" });
+    }
+
+    //check if the user is registered
+    const inviteEmail = existingInvitation.invitationEmail;
+
+    const dbEmail = EmailAddress.findOne({
+      where: {
+        designation: inviteEmail,
+      },
+    });
+
+    if (!dbEmail){
+      
+      return res.redirect("http://localhost:3000/signup");
+    } 
+
+    //check if the user is logged in
+    const cookies = req.cookies;
+
+    console.log("\n\n");
+    console.log(cookies);
+console.log("\n\n");
+    if (!cookies?.jwt) {
+      
+      return res.redirect("http://localhost:3000/login");
+    }
+
+    //add the logged in user to the team of the project
+
+    const concernedProject = Project.findByPk(existingInvitation.projectId);
+
+    if(!concernedProject) {
+      return res.status(400).json({message:'Sorry, No Project to associate with'});
+    }
+
+    const refreshToken = cookies.jwt;
+    // get the logged in user info
+    jwt.verify(
+      refreshToken,
+      process.env.REFRESH_TOKEN_SECRETKEY,
+      async (err, rightuser) => {
+        if (err) {
+          return res.redirect("http://localhost:3000/login");
+        }
+
+        const member = Member.findOne({
+          where: {
+            username: rightuser.username,
+          },
+        });
+
+        if (!member) {
+           return res.redirect("http://localhost:3000/signup");
+        }
+
+        member.teamId = (await concernedProject.getTeam()).id;
+        member.save();
+
+        existingInvitation.accepted = true;
+        existingInvitation.save();
+
+        return res.redirect("http://localhost:3000/dashboard");
+      }
+    );
   }),
 };

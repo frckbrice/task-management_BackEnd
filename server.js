@@ -48,13 +48,18 @@ app.use(
     genid: (req) => {
       console.log("Inside the session middleware");
       console.log(req.sessionID);
+      console.log(req.session);
       return uuid(); // use UUIDs for session IDs
+      
     },
     secret: "keyboard cat",
     resave: false,
     saveUninitialized: true,
   })
 );
+
+
+
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -64,7 +69,7 @@ app.use(errorHandler);
 
 (async () => {
   await db.sequelize
-    .sync({ force: true})
+    .sync({ alter: true})
     .then(() => {
       console.log("database connected successfully");
     })
