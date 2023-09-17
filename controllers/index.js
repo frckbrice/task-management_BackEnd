@@ -19,9 +19,11 @@ module.exports = {
 
   memberController: require("./member.controller"),
   authController: require("./auth.controller"),
-  projectController: require('./project.controller'),
-  taskController: require('./task.controller'),
-  updatesController: require('./updates.controller'),
-  teamController: require('./team.controller'),
-  authController: require('./auth.controller'),
+  projectController: require("./project.controller"),
+  taskController: require("./task.controller"),
+  updatesController: require("./updates.controller"),
+  teamController: require("./team.controller"),
+  authController: require("./auth.controller"),
+  projectStatusController: require("./projectStatus.controller"),
+  invitatationContoller: require('./invitation.controller'),
 };

@@ -20,7 +20,10 @@ db.models.Member = require("./member.model")(sequelize, Sequelize.DataTypes);
 db.models.Task = require("./task.model")(sequelize, Sequelize.DataTypes);
 db.models.Updates = require("./updates.models")(sequelize, Sequelize.DataTypes);
 db.models.Team = require("./team.model")(sequelize, Sequelize.DataTypes);
-db.models.Invitation = require("./invitation.model")(sequelize, Sequelize.DataTypes);
+db.models.Invitation = require("./invitation.model")(
+  sequelize,
+  Sequelize.DataTypes
+);
 db.models.EmailAddress = require("./emailAddress.model")(
   sequelize,
   Sequelize.DataTypes
@@ -29,8 +32,12 @@ db.models.TaskMember = require("./taskmember.model")(
   sequelize,
   Sequelize.DataTypes
 );
+db.models.ProjectStatus = require("./status.model")(
+  sequelize,
+  Sequelize.DataTypes
+);
 
-const { 
+const {
   Project,
   Member,
   Task,
@@ -38,10 +45,17 @@ const {
   Team,
   Invitation,
   EmailAddress,
-  TaskMember } =
-  db.models;
+  TaskMember,
+  ProjectStatus,
+} = db.models;
 
 db.sequelize = sequelize;
+
+ProjectStatus.hasMany(Task);
+Task.belongsTo(ProjectStatus);
+
+ProjectStatus.belongsTo(Project);
+Project.hasMany(ProjectStatus);
 
 //  Member.hasOne()
 Task.hasMany(Updates);
@@ -51,30 +65,38 @@ Member.hasMany(Updates);
 Updates.belongsTo(Member);
 
 Member.hasMany(Project, { foreignKey: "projectManagerId" });
-Project.belongsTo(Member, {as:'projectManager',
+Project.belongsTo(Member, {
+  as: "projectManager",
   foreignKey: "projectManagerId",
 });
 
 Project.hasMany(Task);
 Task.belongsTo(Project);
 
-Task.belongsToMany(Member, { through: TaskMember, uniqueKey: 'TaskMemberId' });
+Task.belongsToMany(Member, { through: TaskMember, uniqueKey: "TaskMemberId" });
 Member.belongsToMany(Task, { through: TaskMember, uniqueKey: "TaskMemberId" });
 
 Member.belongsTo(Team);
 Team.hasMany(Member);
 
-Member.hasMany(Invitation, {foreignKey: 'projectManagerId'});
-Invitation.belongsTo(Member, {as: 'projectManager', foreignKey: 'projectManagerId'});
+Member.hasMany(Invitation, { foreignKey: "projectManagerId" });
+Invitation.belongsTo(Member, {
+  as: "projectManager",
+  foreignKey: "projectManagerId",
+});
 
 Project.hasMany(Invitation);
-Invitation.belongsTo(Project)
+Invitation.belongsTo(Project);
 
-Invitation.hasMany(EmailAddress);
+Invitation.hasMany(EmailAddress, {
+  sourceKey: "invitationEmail",
+  foreignKey: "invitationEmail",
+});
 EmailAddress.belongsTo(Invitation);
 
 Member.hasMany(EmailAddress);
-EmailAddress.belongsTo(Member);
+EmailAddress.belongsTo(Member, { as: "projectMember", foreignKey:'projectMemberId' });
+EmailAddress.belongsTo(Member, { as: "projectManager", foreignKey:'projectManagerId' });
 
 Project.hasOne(Team);
 Team.belongsTo(Project);

@@ -24,12 +24,12 @@ module.exports = {
     const {
       name,
       description,
-      status,
+    
       startDate,
       remarks,
     } = req.body;
 
-    if (!name || !description || !status || !startDate) {
+    if (!name || !description || !startDate) {
       return res.json({ message: "All fields are required" });
     }
 
@@ -49,7 +49,7 @@ module.exports = {
       description,
       startDate,
       remarks,
-      status,
+      
     };
 
     Task.create(uniformTask).then((data) => {
@@ -76,13 +76,13 @@ module.exports = {
       startDate,
       completed,
       remarks,
-      status,
+   
     } = req.body;
 
     if (
       !id ||
       !name ||
-      !status ||
+     
       !remarks ||
       (completed && !Boolean(completed)) || !description
     ) {
@@ -115,7 +115,7 @@ module.exports = {
 
     existingTask.name = name;
     existingTask.remarks = remarks;
-    existingTask.status = status;
+  
     existingTask.completed = completed;
 
     const updatedTask = await existingTask.save();

@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     status: {
       type: DataTypes.STRING,
-      defaultValue: 'todo'
+      defaultValue: "todo",
     },
     startdate: {
       type: DataTypes.STRING,
@@ -34,12 +34,13 @@ module.exports = (sequelize, DataTypes) => {
     remarks: {
       type: DataTypes.STRING,
     },
-    // task_color: {
-    //   type: DataTypes.STRING,
-    // },
+    projectStatusId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+    },
     projectId: {
       type: DataTypes.UUID,
-      allowNull: false
+      allowNull: false,
     },
   });
 
