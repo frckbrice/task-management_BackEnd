@@ -6,16 +6,33 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
-    date: DataTypes.DATE,
-    accepted: DataTypes.BOOLEAN,
+
+    invitationEmail: {
+      type: DataTypes.STRING,
+      unique: true
+    },
+
+    accepted: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+
+    notified: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+
     projectId: {
       type: DataTypes.UUID,
       allowNull: false,
     },
+
     projectManagerId: {
       type: DataTypes.UUID,
       allowNull: false,
     },
+
+    content: DataTypes.TEXT,
   });
 
   return Invitation

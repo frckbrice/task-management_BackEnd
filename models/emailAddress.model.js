@@ -18,6 +18,9 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.UUID,
       allowNull: false,
     },
+    invitationEmail: {
+      type: DataTypes.STRING,
+    },
   });
 
   return EmailAddress;

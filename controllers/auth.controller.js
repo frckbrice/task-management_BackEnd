@@ -6,14 +6,10 @@ const asyncHandler = require("express-async-handler");
 const passport = require("passport");
 
 module.exports = {
-  //@desc register
-  //@route POST /register
-  //@access Public
+  googleRegister: asyncHandler(async (req, res) => {
+    const { username, email, picture, id } = req.body;
 
-  register: asyncHandler(async (req, res) => {
-    const { username, email, password, picture, id } = req.body;
-
-    console.log({ username, email, password, picture });
+    console.log({ username, email, picture });
 
     if (!username || !email) {
       return res.status(400).json({ message: "All fields are required" });
@@ -29,38 +25,97 @@ module.exports = {
 
     console.log("emailProvider: ", emailProvider);
 
+    if (!duplicates) {
+      console.log("already in the database");
+      const registeredUser = await Member.create({
+        username,
+        picture: picture,
+        googleId: id,
+      });
+
+      if (registeredUser) {
+        console.log("creating email adrress");
+        const newEmail = await EmailAddress.create({
+          designation: email,
+          provider: `from ${emailProvider} bearer`,
+          projectMemberId: registeredUser.id,
+        });
+
+        if (newEmail) {
+          console.log(newEmail);
+        }
+        console.log("emailProvider: ", emailProvider);
+
+        console.log(registeredUser);
+        return res.status(201).json({ ...registeredUser, email });
+      }
+    }
+
+    duplicates.createdAt = `${
+      new Date().toISOString().split("T")[0]
+    } ${new Date().toISOString().split("T")[1].toString().slice(0, 8)}`;
+
+    await duplicates.save();
+
+    res.json(email);
+  }),
+  //@desc register
+  //@route POST /register
+  //@access Public
+
+  register: asyncHandler(async (req, res) => {
+    const { username, email, password } = req.body;
+
+    console.log({ username, email, password });
+
+    if (!username || !email || !password) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    // const duplicates = await EmailAddress.findOne({
+    //   where: {
+    //     designation: email,
+    //   },
+    // });
+
+    const duplicates = await EmailAddress.findOne({
+      where: {
+        designation: email,
+      }
+    })
+
+    const emailProvider = email.split("@")[1].split(".")[0];
+
+    console.log("emailProvider: ", emailProvider);
+
     if (duplicates) {
       return res.status(409).json({ message: "this email is already in use" });
     }
 
-    let hashPwd;
-    if (password) {
-      hashPwd = await bcrypt.hash(password, 10);
-    }
+    const hashPwd = await bcrypt.hash(password, 10);
 
-    let registeredUser = await Member.create({
+    const registeredUser = await Member.create({
       username,
-      password: password ? hashPwd : "",
-      isActive: true,
-      picture: picture ? picture : "",
-      googleId: id ? id : "",
+      password: hashPwd,
     });
+const newEmail = await EmailAddress.build({
+  designation: email,
+  provider: `from ${emailProvider} bearer`,
+  projectMemberId: registeredUser.id,
+});
 
-    if (registeredUser) {
-      const newEmail = await EmailAddress.create({
-        designation: email,
-        provider: `from ${emailProvider} provider`,
-        projectMemberId: registeredUser.id,
-      });
+    
+    console.log("emailProvider: ", emailProvider);
 
-      if (newEmail) {
-        console.log(newEmail);
-      }
-      console.log("emailProvider: ", emailProvider);
-
-      console.log(registeredUser);
-      res.status(201).json({ ...registeredUser, email });
+    console.log(registeredUser);
+    if (newEmail) {
+      newEmail.save();
+      console.log(newEmail);
+      return res.status(201).json({ ...registeredUser, email });
     }
+    
+
+    res.status(500).json({ message: "registration failed" });
   }),
 
   //@desc Login
@@ -68,8 +123,10 @@ module.exports = {
   //@access Public
   login: asyncHandler(async (req, res) => {
     const { email, password } = req.body;
-    console.log(email, password);
-    if (!email) {
+
+    console.log("\n\n" + { email, password } + "\n\n");
+
+    if (!email || !password) {
       return res.status(400).json({ message: "All the fields are required" });
     }
 
@@ -79,44 +136,53 @@ module.exports = {
       },
     });
 
-    console.log("existingEmail: ", existingEmail);
+    console.log("\n");
+    console.log({ foundUserID: existingEmail.projectMemberId });
 
     if (!existingEmail) {
       console.log("%c not existing emailaddress: UnAuthorized", "tomato");
-      return res
-        .status(401)
-        .json({ message: "User with this email not found: UnAuthorized!" });
+
+      return res.status(401).json({ message: "UnAuthorized!" });
     }
 
     //look for the person owner of that email
     const foundUser = await Member.findByPk(existingEmail.projectMemberId);
-    console.log("found user: ", foundUser);
+
+    console.log({ foundUser });
+
     //* is active is usefull to deactivate/remove a user from the app project
     if (!foundUser || !foundUser.isActive) {
       console.log("%c not existing emailOwner: UnAuthorized", "tomato");
+
       return res
         .status(401)
         .json({ message: "User not found or inactive: UnAuthorized!" });
     }
 
-    let matchUser;
-    if (password) {
-      matchUser = await bcrypt.compare(password, foundUser.password);
-      console.log("%c\n not emailOwner with password: UnAuthorized\n", "tomato");
-      if (!matchUser) {
-        return res.status(401).json({ message: "NO match: UnAuthorized" });
-      }
+    const matchUser = await bcrypt.compare(password, foundUser.password);
+
+    if (!matchUser) {
+      console.log(
+        "%c\n not emailOwner with password: UnAuthorized\n",
+        "tomato"
+      );
+
+      return res.status(401).json({ message: " UnAuthorized" });
     }
+
+    const userInfo = {
+      username: foundUser?.username,
+      roles: foundUser?.role,
+      email: email,
+      picture: foundUser?.picture,
+    };
+
+    console.log({ userInfo });
 
     //*create token
     const accessToken = jwt.sign(
       {
-        userInfo: {
-          username: foundUser.username,
-          roles: foundUser.role,
-          email: email,
-          picture: foundUser.picture
-        },
+        userInfo,
       },
       process.env.ACCESS_TOKEN_SECRETKEY,
       {
@@ -138,6 +204,74 @@ module.exports = {
     res.cookie("jwt", refreshToken, {
       httpOnly: true,
       // secure: true,
+      sameSite: "None",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    res.json({ accessToken });
+  }),
+
+  googleLogin: asyncHandler(async (req, res) => {
+    const { email } = req.body;
+    console.log("\n\n");
+    console.log({ email });
+
+    if (!email) {
+      return res.status(400).json({ message: "email required" });
+    }
+
+    const existingEmail = await EmailAddress.findOne({
+      where: {
+        designation: email,
+      },
+    });
+    console.log("\n\n");
+    console.log({ existingEmail });
+
+    console.log("\n\n");
+    console.log({ foundUserID: existingEmail.projectMemberId });
+
+    //look for the person owner of that email
+    const foundUser = await Member.findByPk(existingEmail.projectMemberId);
+
+    console.log("\n\n");
+    console.log({ foundUser });
+
+    const userInfo = {
+      username: foundUser?.username,
+      roles: foundUser?.role,
+      email: email,
+      picture: foundUser?.picture,
+    };
+
+    console.log("\n\n");
+    console.log({ userInfo });
+
+    //*create token
+    const accessToken = jwt.sign(
+      {
+        userInfo,
+      },
+      process.env.ACCESS_TOKEN_SECRETKEY,
+      {
+        expiresIn: "20m",
+      }
+    );
+
+    //*create refresh token on backend
+    const refreshToken = jwt.sign(
+      {
+        username: foundUser.username,
+      },
+      process.env.REFRESH_TOKEN_SECRETKEY,
+      {
+        expiresIn: "7d",
+      }
+    );
+
+    res.cookie("jwt", refreshToken, {
+      httpOnly: true,
+      secure: true,
       sameSite: "None",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });

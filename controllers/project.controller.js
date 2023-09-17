@@ -109,7 +109,7 @@ console.log({ pm:existingEmail.projectMemberId });
     Project.create({ ...uniformProject, projectManagerId: pmId }).then((data) => {
       if (data) {
         console.log(data);
-        res.status(201).json({
+        return res.status(201).json({
           message: `The project ${name} successfully created`,
           data,
         });

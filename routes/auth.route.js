@@ -9,7 +9,7 @@ const isAuth = require("../middleware/auth");
 //* to be added. do not forget to handle the failureRedirect/successRedirect below
 // router.route("/").post(loginLimiter, authController.login);
 
-router.route("/login").post(loginLimiter, authController.login);
+
 
 router
   .route("/login/google")
@@ -27,9 +27,15 @@ router.route("/google/callback").get(
   }
 );
 
+router.route("/login").post(loginLimiter, authController.login);
+
+router.route("/googleLogin").post(loginLimiter, authController.googleLogin);
+
 router.route("/logout").post(authController.logout);
 
 router.route("/register").post(authController.register);
+
+router.route("/googleRegister").post(authController.googleRegister);
 
 router.route("/refresh").get(authController.refresh);
 

@@ -17,7 +17,6 @@ const verifyJwt = require("./middleware/verifyJwt");
 const PORT = process.env.PORT || 4000;
 const app = express();
 
-
 app.use(logger);
 app.use(cors(corsOptions));
 
@@ -29,6 +28,7 @@ app.use(
     type: ["application/json", "text/plain"],
   })
 );
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
@@ -40,8 +40,7 @@ app.use("/projects", require("./routes/project.route"));
 app.use("/updates", require("./routes/updates.routes"));
 app.use("/teams", require("./routes/team.routes"));
 app.use("/auth", require("./routes/auth.route"));
-
-app.use(require("serve-static")(__dirname + "/../../public"));
+app.use("/invitation", require("./routes/invitation.route"));
 
 // add & configure middleware
 app.use(
