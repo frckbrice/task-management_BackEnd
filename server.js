@@ -17,7 +17,6 @@ const verifyJwt = require("./middleware/verifyJwt");
 const PORT = process.env.PORT || 4000;
 const app = express();
 
-
 app.use(logger);
 app.use(cors(corsOptions));
 
@@ -65,7 +64,7 @@ app.use(errorHandler);
 
 (async () => {
   await db.sequelize
-    .sync({ alter: true})
+    .sync({ alter: true })
     .then(() => {
       console.log("database connected successfully");
     })
