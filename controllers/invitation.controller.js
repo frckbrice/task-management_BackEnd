@@ -43,7 +43,7 @@ module.exports = {
     if (!concernedProject)
       return res
         .status(400)
-        .json({ message: `No project with the id ${token}` });
+        .json({ message: `No project with this id ${token}` });
 
     const prjectsummary = concernedProject.description
       .toString()
@@ -58,8 +58,9 @@ module.exports = {
       projectManagerId: concernedProject.projectManagerId,
       notified: true,
       content: emailContent,
+      invitationEmail: emails,
     });
-
+   console.log("\n\n after the level of invitation creation");
     const pmId = newInvitation.pr
     console.log("\n\n");
     console.log(newInvitation);
@@ -68,7 +69,6 @@ module.exports = {
     if (newInvitation) {
       EmailAddress.create({
         invitationEmail: emails,
-        projectMemberId: ,
       })
         .then((data) => {
           console.log("\n\nemails stored successfully\n");

@@ -16,7 +16,9 @@ module.exports = (sequelize, DataTypes) => {
     },
     projectMemberId: {
       type: DataTypes.UUID,
-      allowNull: false,
+    },
+    projectManagerId: {
+      type: DataTypes.UUID,
     },
     invitationEmail: {
       type: DataTypes.STRING,

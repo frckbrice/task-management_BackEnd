@@ -88,11 +88,7 @@ Invitation.belongsTo(Member, {
 Project.hasMany(Invitation);
 Invitation.belongsTo(Project);
 
-Invitation.hasMany(EmailAddress, {
-  sourceKey: "invitationEmail",
-  foreignKey: "invitationEmail",
-});
-EmailAddress.belongsTo(Invitation);
+
 
 Member.hasMany(EmailAddress);
 EmailAddress.belongsTo(Member, { as: "projectMember", foreignKey:'projectMemberId' });
@@ -101,4 +97,13 @@ EmailAddress.belongsTo(Member, { as: "projectManager", foreignKey:'projectManage
 Project.hasOne(Team);
 Team.belongsTo(Project);
 
+
+Invitation.hasMany(EmailAddress, {
+  sourceKey: "invitationEmail",
+  foreignKey: "invitationEmail",
+});
+EmailAddress.belongsTo(Invitation);
+
 module.exports = db;
+
+
