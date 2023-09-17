@@ -38,7 +38,7 @@ module.exports = {
         const newEmail = await EmailAddress.create({
           designation: email,
           provider: `from ${emailProvider} bearer`,
-          projectMemberId: registeredUser.id,
+          projectManagerId: registeredUser.id,
         });
 
         if (newEmail) {
@@ -72,12 +72,6 @@ module.exports = {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    // const duplicates = await EmailAddress.findOne({
-    //   where: {
-    //     designation: email,
-    //   },
-    // });
-
     const duplicates = await EmailAddress.findOne({
       where: {
         designation: email,
@@ -101,16 +95,20 @@ module.exports = {
 const newEmail = await EmailAddress.build({
   designation: email,
   provider: `from ${emailProvider} bearer`,
-  projectMemberId: registeredUser.id,
+  projectManagerId: registeredUser.id,
 });
 
     
     console.log("emailProvider: ", emailProvider);
 
     console.log(registeredUser);
+
+
     if (newEmail) {
       newEmail.save();
+
       console.log(newEmail);
+
       return res.status(201).json({ ...registeredUser, email });
     }
     
@@ -146,7 +144,7 @@ const newEmail = await EmailAddress.build({
     }
 
     //look for the person owner of that email
-    const foundUser = await Member.findByPk(existingEmail.projectMemberId);
+    const foundUser = await Member.findByPk(existingEmail.projectManagerId);
 
     console.log({ foundUser });
 
@@ -156,7 +154,7 @@ const newEmail = await EmailAddress.build({
 
       return res
         .status(401)
-        .json({ message: "User not found or inactive: UnAuthorized!" });
+        .json({ message: "UnAuthorized!" });
     }
 
     const matchUser = await bcrypt.compare(password, foundUser.password);
@@ -213,7 +211,7 @@ const newEmail = await EmailAddress.build({
 
   googleLogin: asyncHandler(async (req, res) => {
     const { email } = req.body;
-    console.log("\n\n");
+    console.log("\n\nemail");
     console.log({ email });
 
     if (!email) {
@@ -225,16 +223,17 @@ const newEmail = await EmailAddress.build({
         designation: email,
       },
     });
-    console.log("\n\n");
+    console.log("\n\nexistingEmail");
     console.log({ existingEmail });
 
-    console.log("\n\n");
-    console.log({ foundUserID: existingEmail.projectMemberId });
+    console.log("\n\nfoundUserID");
+    console.log({ foundUserID: existingEmail.projectManagerId });
 
+    console.log("\n\nexistingEmail");
     //look for the person owner of that email
-    const foundUser = await Member.findByPk(existingEmail.projectMemberId);
+    const foundUser = await Member.findByPk(existingEmail.projectManagerId);
 
-    console.log("\n\n");
+    console.log("\n\nfoundUser");
     console.log({ foundUser });
 
     const userInfo = {
@@ -244,7 +243,7 @@ const newEmail = await EmailAddress.build({
       picture: foundUser?.picture,
     };
 
-    console.log("\n\n");
+    console.log("\n\nuserInfo");
     console.log({ userInfo });
 
     //*create token

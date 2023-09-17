@@ -73,9 +73,7 @@ module.exports = {
 
     console.log({user: req.user})
 
-    let existingEmail;
-   
-      existingEmail = await EmailAddress.findOne({
+   const existingEmail = await EmailAddress.findOne({
         where: {
           designation: req.user,
         },
@@ -93,7 +91,7 @@ console.log({ pm:existingEmail.projectMemberId });
       return res.status(409).json({ message: `${name} already exists` });
     }
 
-    let  pmId  = existingEmail.projectMemberId;
+    let  pmId  = existingEmail.projectManagerId;
 
     const uniformProject = {
       name,
@@ -103,8 +101,6 @@ console.log({ pm:existingEmail.projectMemberId });
       estimateEndDate,
       remarks,
     };
-
-
 
     Project.create({ ...uniformProject, projectManagerId: pmId }).then((data) => {
       if (data) {
