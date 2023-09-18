@@ -69,7 +69,7 @@ app.use(errorHandler);
 
 (async () => {
   await db.sequelize
-    .sync({ alter: true})
+    .sync({ force: true})
     .then(() => {
       console.log("database connected successfully");
     })
