@@ -57,7 +57,7 @@ module.exports = {
       notified: true,
       content: emailContent,
       invitationEmail: emails,
-    }).catch(err => console.log(err));
+    }).catch((err) => console.log(err));
 
     console.log("\n\n after the level of invitation creation");
 
@@ -77,9 +77,9 @@ module.exports = {
         });
     }
 
-   const newContent = `${emailContent}invitation/${newInvitation.id}`;
+    const newContent = `${emailContent}invitation/${newInvitation.id}`;
 
-console.log(newContent)
+    console.log(newContent);
     const transporter = nodemailer.createTransport({
       service: "gmail",
       // host: "smtp.google.com",
@@ -205,28 +205,32 @@ console.log(newContent)
       },
     });
 
-    if (!dbEmail){
-      
-      return res.redirect("http://localhost:3000/signup");
-    } 
+    if (!dbEmail) {
+      return res.redirect(
+        "https://frontend-tasktrec-mfkw613e0-nsamedaisy.vercel.app/signup"
+      );
+    }
 
     //check if the user is logged in
     const cookies = req.cookies;
 
     console.log("\n\n");
     console.log(cookies);
-console.log("\n\n");
+    console.log("\n\n");
     if (!cookies?.jwt) {
-      
-      return res.redirect("http://localhost:3000/login");
+      return res.redirect(
+        "https://frontend-tasktrec-mfkw613e0-nsamedaisy.vercel.app/login"
+      );
     }
 
     //add the logged in user to the team of the project
 
     const concernedProject = Project.findByPk(existingInvitation.projectId);
 
-    if(!concernedProject) {
-      return res.status(400).json({message:'Sorry, No Project to associate with'});
+    if (!concernedProject) {
+      return res
+        .status(400)
+        .json({ message: "Sorry, No Project to associate with" });
     }
 
     const refreshToken = cookies.jwt;
@@ -236,7 +240,9 @@ console.log("\n\n");
       process.env.REFRESH_TOKEN_SECRETKEY,
       async (err, rightuser) => {
         if (err) {
-          return res.redirect("http://localhost:3000/login");
+          return res.redirect(
+            "https://frontend-tasktrec-mfkw613e0-nsamedaisy.vercel.app/login"
+          );
         }
 
         const member = Member.findOne({
@@ -246,7 +252,9 @@ console.log("\n\n");
         });
 
         if (!member) {
-           return res.redirect("http://localhost:3000/signup");
+          return res.redirect(
+            "https://frontend-tasktrec-mfkw613e0-nsamedaisy.vercel.app/signup"
+          );
         }
 
         member.teamId = (await concernedProject.getTeam()).id;
@@ -255,7 +263,9 @@ console.log("\n\n");
         existingInvitation.accepted = true;
         existingInvitation.save();
 
-        return res.redirect("http://localhost:3000/dashboard");
+        return res.redirect(
+          "https://frontend-tasktrec-mfkw613e0-nsamedaisy.vercel.app/dashboard"
+        );
       }
     );
   }),
