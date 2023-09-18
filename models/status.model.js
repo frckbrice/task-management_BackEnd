@@ -9,6 +9,7 @@ module.exports = (sequelize, DataTypes) => {
     designation: {
       type: DataTypes.STRING,
       allowNull:false,
+      defaultValue: 'todo'
     },
     color: {
       type: DataTypes.STRING,
