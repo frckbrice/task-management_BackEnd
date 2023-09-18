@@ -24,12 +24,10 @@ module.exports = {
     const {
       name,
       description,
-    
-      startDate,
-      remarks,
+     projectId,
     } = req.body;
 
-    if (!name || !description || !startDate) {
+    if (!name || !description || !projectId) {
       return res.json({ message: "All fields are required" });
     }
 
@@ -47,9 +45,8 @@ module.exports = {
     const uniformTask = {
       name,
       description,
-      startDate,
-      remarks,
-      
+      projectId,
+      // projectStatusId,
     };
 
     Task.create(uniformTask).then((data) => {
