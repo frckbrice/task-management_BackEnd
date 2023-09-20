@@ -15,7 +15,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    positionInTheList: DataTypes.STRING,
+    positionInTheList: DataTypes.TINYINT,
     projectId: {
       type: DataTypes.UUID,
       allowNull: false,

@@ -23,17 +23,18 @@ module.exports = {
   //@route POST /invitation
   //access private
   createInvitation: asyncHandler(async (req, res) => {
-    const { token, emails, emailContent } = req.body;
+    const { projectToken, emails, emailContent, emailDescription } = req.body;
 
+    let subject;
     console.log("\n\n in the create invitation");
-    console.log({ token, emails, emailContent });
+    console.log({ projectToken, emails, emailContent });
 
-    if (!token || !emails || !emailContent) {
+    if (!projectToken || !emails || !emailContent) {
       return res.json({ message: "All fields are required" });
     }
 
     // look for the concerned project description
-    const concernedProject = await Project.findByPk(token);
+    const concernedProject = await Project.findByPk(projectToken);
 
     console.log("\n\n");
     console.log(concernedProject);
@@ -41,7 +42,7 @@ module.exports = {
     if (!concernedProject)
       return res
         .status(400)
-        .json({ message: `No project with this id ${token}` });
+        .json({ message: `No project with this id ${projectToken}` });
 
     const prjectsummary = concernedProject.description
       .toString()
@@ -52,7 +53,7 @@ module.exports = {
     console.log("\n\nat the level of invitation creation");
 
     const newInvitation = await Invitation.create({
-      projectId: token,
+      projectId: projectToken,
       projectManagerId: concernedProject.projectManagerId,
       notified: true,
       content: emailContent,
@@ -91,10 +92,16 @@ module.exports = {
       },
     });
 
+    if (emailDescription) {
+      subject = emailDescription;
+    } else {
+      subject = `INVITATION TO TAKE PART TO THE PROJECT ${projectname}`;
+    }
+    
     mailOptions = {
       from: "maebrie2017@gmail.com",
       to: emails,
-      subject: `INVITATION TO TAKE PART TO THE PROJECT ${projectname}`,
+      subject: subject,
       text: `${prjectsummary} please click the following link to join the project ${newContent}`,
     };
 

@@ -30,8 +30,10 @@ module.exports = (sequelize, DataTypes) => {
     remarks: {
       type: DataTypes.STRING,
     },
+    //* need to handle the create project status table to allow not null
     projectStatusId: {
       type: DataTypes.UUID,
+      allowNull: false,
     },
     projectId: {
       type: DataTypes.UUID,

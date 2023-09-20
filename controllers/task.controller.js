@@ -1,6 +1,6 @@
 const { Task, Member, Team, Project, Updates } = require("../models").models;
 const { Op } = require("sequelize");
-
+const asyncHandler = require("express-async-handler");
 const bcrypt = require("bcrypt");
 
 module.exports = {
@@ -8,24 +8,28 @@ module.exports = {
   //@route GET /tasks
   //access Private
 
-  getAllTask: async (req, res) => {
+  getAllTask: asyncHandler(async (req, res) => {
     Task.findAll().then((data) => {
       console.log(data);
       if (!data.length)
         return res.status(400).json({ message: "No task found" });
       res.json(data);
     });
-  },
+  }),
 
   //@desc create task
   //@route POST /tasks
   //access private
-  createTask: async (req, res) => {
-    const {
+  createTask: asyncHandler(async (req, res) => {
+    const { name, description, projectId } = req.body;
+
+    console.log("\n\n");
+    console.log({
       name,
       description,
-     projectId,
-    } = req.body;
+      projectId,
+    });
+    console.log("\n");
 
     if (!name || !description || !projectId) {
       return res.json({ message: "All fields are required" });
@@ -49,39 +53,36 @@ module.exports = {
       // projectStatusId,
     };
 
-    Task.create(uniformTask).then((data) => {
-      if (data) {
-        console.log(data);
-        res.status(201).json({
-          message: `The task ${name} successfully created`,
-          data,
-        });
-      } else {
-        return res.json({ message: "Failed to create task" });
-      }
-    });
-  },
+    Task.create(uniformTask)
+      .then((data) => {
+        if (data) {
+          console.log("\n\ndata from create task: ", data);
+          res.status(201).json({
+            message: `The task ${name} successfully created`,
+            data,
+          });
+        } else {
+          return res.json({ message: "Failed to create task" });
+        }
+      })
+      .catch(function (error) {
+        console.log("\n\nFailed to create task: ", err);
+        return res.status(500).json({ message: "Failed to create task" });
+      });
+  }),
 
   //@desc update a task
   //@route PATCH /task
   //access Private
-  updateTask: async (req, res) => {
-    const {
-      id,
-      name,
-      description,
-      startDate,
-      completed,
-      remarks,
-   
-    } = req.body;
+  updateTask: asyncHandler(async (req, res) => {
+    const { id, name, description, completed, projectStatusId } = req.body;
 
     if (
       !id ||
       !name ||
-     
-      !remarks ||
-      (completed && !Boolean(completed)) || !description
+      !projectStatusId ||
+      (completed && !Boolean(completed)) ||
+      !description
     ) {
       return res.status(400).json({ message: "All the fields are required" });
     }
@@ -100,29 +101,27 @@ module.exports = {
     });
 
     if (duplicates && duplicates.id.toString() !== id.toString()) {
-      console.log(duplicates)
+      console.log(duplicates);
       return res
         .status(409)
         .json({ message: "duplicates task: same task name" });
     }
 
-   
-
     existingTask.description = description;
 
     existingTask.name = name;
-    existingTask.remarks = remarks;
-  
+    existingTask.projectStatusId = projectStatusId;
+
     existingTask.completed = completed;
 
     const updatedTask = await existingTask.save();
-    if (updatedTask) res.json({ msg: `user successfully updated` });
-  },
+    if (updatedTask) res.json({ msg: `Task successfully updated` });
+  }),
 
   //@desc delete a task
   //@route DELETE /task
   //access Private
-  deleteTask: async (req, res) => {
+  deleteTask: asyncHandler(async (req, res) => {
     const { id } = req.body;
 
     if (!id) {
@@ -145,5 +144,5 @@ module.exports = {
         .status(201)
         .json({ message: `The task with id ${id} deleted successfully` });
     }
-  },
+  }),
 };

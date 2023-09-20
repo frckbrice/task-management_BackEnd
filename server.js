@@ -59,8 +59,6 @@ app.use(
 );
 
 
-
-
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -69,9 +67,9 @@ app.use(errorHandler);
 
 (async () => {
   await db.sequelize
-    .sync({ alter: true})
+    .sync({ force: true})
     .then(() => {
-      console.log("database connected successfully");
+      console.log("\n\ndatabase connected successfully\n\n");
     })
     .catch(function (err) {
       console.log("\n\nFailed to connect to MYSQL DATABASE\n\n", err);
@@ -81,4 +79,4 @@ app.use(errorHandler);
       );
     });
 })();
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`\nServer running on port ${PORT}\n`));

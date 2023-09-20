@@ -229,7 +229,6 @@ req.session.user = req.body;
     console.log("\n\nfoundUserID");
     console.log({ foundUserID: existingEmail.projectManagerId });
 
-    console.log("\n\nexistingEmail");
     //look for the person owner of that email
     const foundUser = await Member.findByPk(existingEmail.projectManagerId);
 
@@ -243,7 +242,7 @@ req.session.user = req.body;
       picture: foundUser?.picture,
     };
 
-    console.log("\n\nuserInfo");
+    console.log("\n\nuserInfo for the token ");
     console.log({ userInfo });
 
     //*create token
