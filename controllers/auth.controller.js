@@ -57,8 +57,9 @@ module.exports = {
 
     await duplicates.save();
 
-    res.json(email);
+    res.json({ email });
   }),
+
   //@desc register
   //@route POST /register
   //@access Public
@@ -75,8 +76,8 @@ module.exports = {
     const duplicates = await EmailAddress.findOne({
       where: {
         designation: email,
-      }
-    })
+      },
+    });
 
     const emailProvider = email.split("@")[1].split(".")[0];
 
@@ -92,26 +93,23 @@ module.exports = {
       username,
       password: hashPwd,
     });
-const newEmail = await EmailAddress.build({
-  designation: email,
-  provider: `from ${emailProvider} bearer`,
-  projectManagerId: registeredUser.id,
-});
+    const newEmail = await EmailAddress.build({
+      designation: email,
+      provider: `from ${emailProvider} bearer`,
+      projectManagerId: registeredUser.id,
+    });
 
-    
     console.log("emailProvider: ", emailProvider);
 
     console.log(registeredUser);
 
-
     if (newEmail) {
       newEmail.save();
 
-      console.log(newEmail);
+    console.log(newEmail);
 
-      return res.status(201).json({ ...registeredUser, email });
+    return res.status(201).json({ ...registeredUser, email });
     }
-    
 
     res.status(500).json({ message: "registration failed" });
   }),
@@ -127,7 +125,7 @@ const newEmail = await EmailAddress.build({
     if (!email || !password) {
       return res.status(400).json({ message: "All the fields are required" });
     }
-req.session.user = req.body;
+    //req.session.user = req.body;
 
     const existingEmail = await EmailAddress.findOne({
       where: {
@@ -147,15 +145,15 @@ req.session.user = req.body;
     //look for the person owner of that email
     const foundUser = await Member.findByPk(existingEmail.projectManagerId);
 
+    console.log('\n\n');
     console.log({ foundUser });
+    console.log("\n\n");
 
     //* is active is usefull to deactivate/remove a user from the app project
     if (!foundUser || !foundUser.isActive) {
       console.log("%c not existing emailOwner: UnAuthorized", "tomato");
 
-      return res
-        .status(401)
-        .json({ message: "UnAuthorized!" });
+      return res.status(401).json({ message: "UnAuthorized!" });
     }
 
     const matchUser = await bcrypt.compare(password, foundUser.password);
@@ -206,11 +204,12 @@ req.session.user = req.body;
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    res.json({ accessToken });
+    res.json({ accessToken, refreshToken });
   }),
 
   googleLogin: asyncHandler(async (req, res) => {
     const { email } = req.body;
+
     console.log("\n\nemail");
     console.log({ email });
 
@@ -252,7 +251,7 @@ req.session.user = req.body;
       },
       process.env.ACCESS_TOKEN_SECRETKEY,
       {
-        expiresIn: "20m",
+        expiresIn: "15m",
       }
     );
 
@@ -267,6 +266,7 @@ req.session.user = req.body;
       }
     );
 
+    //this is for web app only
     res.cookie("jwt", refreshToken, {
       httpOnly: true,
       secure: true,
@@ -274,7 +274,7 @@ req.session.user = req.body;
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    res.json({ accessToken });
+    return res.json({ accessToken, refreshToken });
   }),
 
   //@desc Logout
@@ -300,19 +300,30 @@ req.session.user = req.body;
   //@route Get /auth/refresh
   //@access Public
   refresh: asyncHandler(async (req, res, next) => {
-    const cookies = req.cookies;
+    const authHeader = req.headers.authorization || req.headers.Authorization;
 
-    console.log(cookies);
-    console.log(cookies?.jwt);
-
-    if (!cookies?.jwt) {
-      return res
-        .status(401)
-        .json({ message: "No cookie in the header : UnAuthorized" });
+    console.log("in the refresh controller", authHeader);
+    
+ console.log("in the refresh before authHeader check");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return res.status(401).send("UnAuthorized. no start with bearer");
     }
 
-    const refreshToken = cookies.jwt;
+     console.log("in the refresh after authHeader check");
 
+    const refreshToken = authHeader.split(" ")[1];
+   
+
+    console.log('\n\n ');
+    console.log("refreshToken", refreshToken);
+     console.log("\n");
+
+    if (!refreshToken) {
+      return res.status(401).json({ message: "UnAuthorized. no refresh token" });
+    }
+
+
+    console.log("before verify");
     jwt.verify(
       refreshToken,
       process.env.REFRESH_TOKEN_SECRETKEY,
@@ -322,10 +333,12 @@ req.session.user = req.body;
         }
 
         const foundUser = await Member.findOne({
-          where: {
+          where: { 
             username: decodedUserInfo.username,
           },
         });
+
+        console.log(foundUser);
 
         if (!foundUser) {
           return res
@@ -342,12 +355,13 @@ req.session.user = req.body;
           },
           process.env.ACCESS_TOKEN_SECRETKEY,
           {
-            dexpiresIn: "20m",
+            expiresIn: "15m",
           }
         );
-
+console.log("in the refresh verify");
         res.json({ accessToken });
       }
     );
+    console.log("after  the refreh verify");
   }),
 };

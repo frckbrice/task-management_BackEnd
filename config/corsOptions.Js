@@ -2,16 +2,16 @@ const { allowedOrigin } = require("./allowedOrigin");
 
 const corsOptions = {
   origin: (origin, callback) => {
+    // no origin because of postman/thunder testers
     if (allowedOrigin.includes(origin) || !origin) {
-      // no origin because of postman/thunder testers
+      // console.log({ original_request: origin });
       callback(null, true);
     } else {
       callback(new Error("NOT ALLOW BECAUSE OF CORS"));
     }
   },
-  Credentials: true,
   optionSuccessStatus: 200,
-  allowCredentials : true,
+  credentials : true,
 };
 
 module.exports = corsOptions;

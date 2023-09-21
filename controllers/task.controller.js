@@ -2,7 +2,7 @@ const { Task, Member, Team, Project, Updates } = require("../models").models;
 const { Op } = require("sequelize");
 const asyncHandler = require("express-async-handler");
 const bcrypt = require("bcrypt");
-
+const {v4:uuid} = require("uuid");
 module.exports = {
   //@desc get all task
   //@route GET /tasks
@@ -50,7 +50,7 @@ module.exports = {
       name,
       description,
       projectId,
-      // projectStatusId,
+      projectStatusId: uuid(),
     };
 
     Task.create(uniformTask)
@@ -66,7 +66,7 @@ module.exports = {
         }
       })
       .catch(function (error) {
-        console.log("\n\nFailed to create task: ", err);
+        console.log("\n\nFailed to create task: ", error);
         return res.status(500).json({ message: "Failed to create task" });
       });
   }),

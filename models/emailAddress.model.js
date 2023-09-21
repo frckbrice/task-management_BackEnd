@@ -11,6 +11,9 @@ module.exports = (sequelize, DataTypes) => {
     designation: {
       type: DataTypes.STRING,
     },
+    invitationEmail: {
+      type: DataTypes.STRING,
+    },
     provider: {
       type: DataTypes.STRING,
     },
