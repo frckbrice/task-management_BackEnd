@@ -1,7 +1,7 @@
 const { Project, Member, Team, Task, EmailAddress } =
   require("../models").models;
 const { Op } = require("sequelize");
-
+const asyncHandler = require('express-async-handler');
 const bcrypt = require("bcrypt");
 
 module.exports = {
@@ -9,30 +9,51 @@ module.exports = {
   //@route GET /project
   //access Private
 
-  getAllProject: async (req, res) => {
-    Project.findAll().then((data) => {
-      console.log(data);
-      if (!data.length)
-        return res.status(400).json({ message: "No projects found" });
-      res.json(data);
-    });
-  },
+  getAllProject: asyncHandler(async (req, res) => {
+
+    //get all projects for the authenticated user
+    const email = req.email;
+    const emailAuth = await EmailAddress.findOne({
+      where: {
+        designation: email,
+      }
+    })
+
+    console.log('\n\n', emailAuth)
+
+    if(emailAuth) {
+     Project.findAll({
+       where: {
+         projectManagerId: emailAuth.projectManagerId,
+       }
+     }).then((data) => {
+       console.log(data);
+       if (!data.length) {
+         return res.status(400).json({ message: "No projects found" });
+       }
+       res.json(data);
+     });
+    }else {
+      return res.redirect('http://localhost:3000/login');
+    }
+
+  }),
 
   //@desc get all project members
   //@route GET /project/members
   //access Private
-  getProjectMembers: async (req, res) => {
+  getProjectMembers: asyncHandler(async (req, res) => {
     // get the id of the project
     const { id } = req.body;
 
-    if (!id) return res.status(400).json({ message: " Id is needed" });
+    if (!id) return res.status(400).json({ message: " project Id is needed" });
 
     // const targetProject = await Project.findByPk(id, {
     //   include: Team,
     // });
     const targetProject = await Project.findByPk(id);
     if (!targetProject)
-      return res.status(404).json({ message: "This project doesn't exist" });
+      return res.status(400).json({ message: "This project doesn't exist" });
 
     const projectTeam = await targetProject.getTeam();
     if (!projectTeam)
@@ -56,7 +77,7 @@ module.exports = {
       message: `List of member associated to project${targetProject.name}`,
       projectMember,
     });
-  },
+  }),
 
   //@desc create project
   //@route POST /project
