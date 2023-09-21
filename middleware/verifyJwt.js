@@ -25,11 +25,14 @@ const verifyJwt = (req, res, next) => {
         return res.status(403).json({ message: "Forbidden" });
       }
 
+      
       req.user = decodedUserInfo.userInfo.username;
       req.roles = decodedUserInfo.userInfo.roles;
-      req.user = decodedUserInfo.userInfo.email;
-
+      if (decodedUserInfo.userInfo.email)
+        req.email = decodedUserInfo.userInfo.email;
+      req.picture = decodedUserInfo.userInfo.picture;
       console.log("\n\nuser", req.user);
+      console.log("\n\ndecodeuser", decodedUserInfo);
 
       next();
     }

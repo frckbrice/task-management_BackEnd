@@ -62,24 +62,35 @@ module.exports = {
   //@route POST /project
   //access private
   createProject: async (req, res) => {
-    const { name, description, banner, startDate, estimateEndDate, remarks, teamName } =
-      req.body;
+    const {
+      name,
+      description,
+      banner,
+      startDate,
+      estimateEndDate,
+      remarks,
+      teamName,
+    } = req.body;
 
-    // const { email } = req.user;
+    console.log("\n\n project info: ");
+    console.log({
+      name,
+      description,
+      banner,
+      startDate,
+      estimateEndDate,
+      remarks,
+      teamName,
+    });
+
+    console.log("\n\n");
 
     if (!name || !description || !estimateEndDate || !startDate) {
       return res.json({ message: "All fields are required" });
     }
 
-    console.log({user: req.user})
+    console.log({ user: req.user });
 
-   const existingEmail = await EmailAddress.findOne({
-        where: {
-          designation: req.user,
-        },
-      });
-    
-console.log({ pm:existingEmail.projectMemberId });
     const duplicates = await Project.findOne({
       where: {
         name,
@@ -87,11 +98,10 @@ console.log({ pm:existingEmail.projectMemberId });
     });
 
     if (duplicates) {
-      console.log({duplicates});
+      console.log("\n\n");
+      console.log({ duplicates });
       return res.status(409).json({ message: `${name} already exists` });
     }
-
-    let  pmId  = existingEmail.projectManagerId;
 
     const uniformProject = {
       name,
@@ -102,31 +112,64 @@ console.log({ pm:existingEmail.projectMemberId });
       remarks,
     };
 
-    Project.create({ ...uniformProject, projectManagerId: pmId }).then(async(data) => {
-      if (data) {
-        console.log(data);
+    const email = req.email;
+    const picture = req.picture;
+    const username = req.user;
+    console.log("\n\n");
+    console.log({ email, picture, username });
+    console.log("\n\n");
+    let existingEmail;
+    let pM;
+    let pmId;
+    if (email) {
+      existingEmail = await EmailAddress.findOne({
+        where: {
+          designation: email,
+        },
+      });
+      pmId = existingEmail.projectManagerId;
+    } else if (username) {
+      pM = await Member.findOne({
+        where: {
+          username,
+        },
+      });
+      // console.log({pM});
+      pmId = pM.id;
+    }
 
-        // we create also a team that handle a project 
-        const newTeam = await Team.create({
-          name: teamName,
-          projectId: data.id 
-          
-        })
+    console.log("\n\n");
+    console.log({ existingEmail, pmId });
+    console.log("\n\n");
 
-        if(newTeam) {
-          console.log('\n\n team also created successfully');
+    Project.create({ ...uniformProject, projectManagerId: pmId })
+      .then(async (data) => {
+        if (data) {
+          console.log("project creted successfully");
+          console.log(data);
 
-          return res.status(201).json({
-            message: `The project ${name} successfully created`,
-            data,
+          // we create also a team that handle a project
+          const newTeam = await Team.create({
+            name: teamName,
+            projectId: data.id,
           });
-        }
 
-        
-      } else {
-        return res.json({ message: "Failed to create project" });
-      }
-    });
+          if (newTeam) {
+            console.log("\n\n team also created successfully", newTeam);
+
+            return res.status(201).json({
+              message: `The project ${name} successfully created`,
+              data,
+            });
+          }
+        }
+      })
+      .catch(function (error) {
+        console.log("error creating a project", error);
+        return res.status(500).json({
+          message: `failed  to create a project`,
+        });
+      });
   },
 
   //@desc update a project

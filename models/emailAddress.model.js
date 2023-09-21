@@ -11,6 +11,9 @@ module.exports = (sequelize, DataTypes) => {
     designation: {
       type: DataTypes.STRING,
     },
+    invitationEmail: {
+      type: DataTypes.STRING,
+    },
     provider: {
       type: DataTypes.STRING,
     },
@@ -20,8 +23,8 @@ module.exports = (sequelize, DataTypes) => {
     projectManagerId: {
       type: DataTypes.UUID,
     },
-    invitationEmail: {
-      type: DataTypes.STRING,
+    invitationId: {
+      type: DataTypes.UUID,
     },
   });
 

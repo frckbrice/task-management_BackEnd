@@ -32,7 +32,7 @@ db.models.TaskMember = require("./taskmember.model")(
   sequelize,
   Sequelize.DataTypes
 );
-db.models.ProjectStatus = require("./status.model")(
+db.models.ProjectStatus = require("./projectStatus.model")(
   sequelize,
   Sequelize.DataTypes
 );
@@ -98,10 +98,7 @@ Project.hasOne(Team);
 Team.belongsTo(Project);
 
 
-Invitation.hasMany(EmailAddress, {
-  sourceKey: "invitationEmail",
-  foreignKey: "invitationEmail",
-});
+Invitation.hasMany(EmailAddress);
 EmailAddress.belongsTo(Invitation);
 
 module.exports = db;

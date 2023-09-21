@@ -7,11 +7,6 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true,
     },
 
-    invitationEmail: {
-      type: DataTypes.STRING,
-      unique: true
-    },
-
     accepted: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,

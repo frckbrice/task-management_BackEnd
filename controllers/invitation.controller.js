@@ -23,17 +23,18 @@ module.exports = {
   //@route POST /invitation
   //access private
   createInvitation: asyncHandler(async (req, res) => {
-    const { token, emails, emailContent } = req.body;
+    const { projectToken, emails, emailContent, emailDescription } = req.body;
 
+    let subject;
     console.log("\n\n in the create invitation");
-    console.log({ token, emails, emailContent });
+    console.log({ projectToken, emails, emailContent });
 
-    if (!token || !emails || !emailContent) {
+    if (!projectToken || !emails || !emailContent) {
       return res.json({ message: "All fields are required" });
     }
 
     // look for the concerned project description
-    const concernedProject = await Project.findByPk(token);
+    const concernedProject = await Project.findByPk(projectToken);
 
     console.log("\n\n");
     console.log(concernedProject);
@@ -41,7 +42,7 @@ module.exports = {
     if (!concernedProject)
       return res
         .status(400)
-        .json({ message: `No project with this id ${token}` });
+        .json({ message: `No project with this id ${projectToken}` });
 
     const prjectsummary = concernedProject.description
       .toString()
@@ -52,11 +53,11 @@ module.exports = {
     console.log("\n\nat the level of invitation creation");
 
     const newInvitation = await Invitation.create({
-      projectId: token,
+      projectId: projectToken,
       projectManagerId: concernedProject.projectManagerId,
       notified: true,
       content: emailContent,
-      invitationEmail: emails,
+      
     }).catch((err) => console.log(err));
 
     console.log("\n\n after the level of invitation creation");
@@ -68,6 +69,7 @@ module.exports = {
     if (newInvitation) {
       EmailAddress.create({
         invitationEmail: emails,
+        invitationId: newInvitation.id,
       })
         .then((data) => {
           console.log("\n\nemails stored successfully\n");
@@ -91,10 +93,16 @@ module.exports = {
       },
     });
 
+    if (emailDescription) {
+      subject = emailDescription;
+    } else {
+      subject = `INVITATION TO TAKE PART TO THE PROJECT ${projectname}`;
+    }
+    
     mailOptions = {
       from: "maebrie2017@gmail.com",
       to: emails,
-      subject: `INVITATION TO TAKE PART TO THE PROJECT ${projectname}`,
+      subject: subject,
       text: `${prjectsummary} please click the following link to join the project ${newContent}`,
     };
 
@@ -197,34 +205,29 @@ module.exports = {
     }
 
     //check if the user is registered
-    const inviteEmail = existingInvitation.invitationEmail;
-
-    const dbEmail = EmailAddress.findOne({
+    const inviteEmail = await EmailAddress.findOne({
       where: {
-        designation: inviteEmail,
-      },
-    });
+        invitationId: existingInvitation.id,
+      }
+    })
 
-    if (!dbEmail) {
+// if not register redirect to register page
+    if (!inviteEmail) {
       return res.redirect(
         "https://frontend-tasktrec-mfkw613e0-nsamedaisy.vercel.app/signup"
       );
     }
 
     //check if the user is logged in
-    const cookies = req.cookies;
+    const authHeader = req.headers.Authorization || req.headers.authorization;
 
-    console.log("\n\n");
-    console.log(cookies);
-    console.log("\n\n");
-    if (!cookies?.jwt) {
+    if(!authHeader.startsWith('Bearer'))
       return res.redirect(
         "https://frontend-tasktrec-mfkw613e0-nsamedaisy.vercel.app/login"
       );
-    }
+    
 
     //add the logged in user to the team of the project
-
     const concernedProject = Project.findByPk(existingInvitation.projectId);
 
     if (!concernedProject) {
@@ -233,7 +236,7 @@ module.exports = {
         .json({ message: "Sorry, No Project to associate with" });
     }
 
-    const refreshToken = cookies.jwt;
+    const refreshToken = authHeader.split(' ')[1];
     // get the logged in user info
     jwt.verify(
       refreshToken,
@@ -257,7 +260,19 @@ module.exports = {
           );
         }
 
-        member.teamId = (await concernedProject.getTeam()).id;
+        const projectTeam = await Team.findOne({
+          where: {
+            projectId: concernedProject.id,
+          }
+        })
+
+        if(!projectTeam) {
+          return res.redirect(
+            'https://frontend-tasktrec-mfkw613e0-nsamedaisy.vercel.app/'
+          );
+        }
+
+        member.projectId = projectTeam.id;
         member.save();
 
         existingInvitation.accepted = true;
