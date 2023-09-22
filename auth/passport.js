@@ -16,7 +16,7 @@ passport.use(
     },
     (jwtPayload, done) => {
       console.log(jwtPayload);
-      console.log(process.env.JWT_SECRET);
+      console.log(`${process.env.JWT_SECRET}`);
       return Member.findOne({
         where: {
           id: jwtPayload.id,

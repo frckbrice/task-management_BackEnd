@@ -20,8 +20,8 @@ const app = express();
 app.use(logger);
 app.use(cors(corsOptions));
 
-require("./auth/passport");
-require("./auth/passportGoogleSSO");
+// require("./auth/passport");
+// require("./auth/passportGoogleSSO");
 
 app.use(
   express.json({
@@ -43,24 +43,24 @@ app.use("/auth", require("./routes/auth.route"));
 app.use("/invitation", require("./routes/invitation.route"));
 
 // add & configure middleware
-app.use(
-  session({
-    genid: (req) => {
-      console.log("Inside the session middleware");
-      console.log(req.sessionID);
-      console.log(req.session);
-      return uuid(); // use UUIDs for session IDs
+// app.use(
+//   session({
+//     genid: (req) => {
+//       console.log("Inside the session middleware");
+//       console.log(req.sessionID);
+//       console.log(req.session);
+//       return uuid(); // use UUIDs for session IDs
       
-    },
-    secret: "keyboard cat",
-    resave: false,
-    saveUninitialized: true,
-  })
-);
+//     },
+//     secret: "keyboard cat",
+//     resave: false,
+//     saveUninitialized: true,
+//   })
+// );
 
 
-app.use(passport.initialize());
-app.use(passport.session());
+// app.use(passport.initialize());
+// app.use(passport.session());
 
 app.all("*", root.noRoutes);
 app.use(errorHandler);

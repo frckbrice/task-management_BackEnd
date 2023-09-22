@@ -213,18 +213,14 @@ module.exports = {
 
 // if not register redirect to register page
     if (!inviteEmail) {
-      return res.redirect(
-        "https://frontend-tasktrec-mfkw613e0-nsamedaisy.vercel.app/signup"
-      );
+      return res.redirect(`${process.env.FRONTEND_ADDRESS}/signup`);
     }
 
     //check if the user is logged in
     const authHeader = req.headers.Authorization || req.headers.authorization;
 
     if(!authHeader.startsWith('Bearer'))
-      return res.redirect(
-        "https://frontend-tasktrec-mfkw613e0-nsamedaisy.vercel.app/login"
-      );
+      return res.redirect(`${process.env.FRONTEND_ADDRESS}/login`);
     
 
     //add the logged in user to the team of the project
@@ -243,9 +239,7 @@ module.exports = {
       process.env.REFRESH_TOKEN_SECRETKEY,
       async (err, rightuser) => {
         if (err) {
-          return res.redirect(
-            "https://frontend-tasktrec-mfkw613e0-nsamedaisy.vercel.app/login"
-          );
+         return res.redirect(`${process.env.FRONTEND_ADDRESS}/login`);
         }
 
         const member = Member.findOne({
@@ -255,9 +249,7 @@ module.exports = {
         });
 
         if (!member) {
-          return res.redirect(
-            "https://frontend-tasktrec-mfkw613e0-nsamedaisy.vercel.app/signup"
-          );
+          return res.redirect(`${process.env.FRONTEND_ADDRESS}/signup`);
         }
 
         const projectTeam = await Team.findOne({
@@ -267,9 +259,7 @@ module.exports = {
         })
 
         if(!projectTeam) {
-          return res.redirect(
-            'https://frontend-tasktrec-mfkw613e0-nsamedaisy.vercel.app/'
-          );
+           return res.redirect(`${process.env.FRONTEND_ADDRESS}`);
         }
 
         member.projectId = projectTeam.id;
@@ -278,9 +268,7 @@ module.exports = {
         existingInvitation.accepted = true;
         existingInvitation.save();
 
-        return res.redirect(
-          "https://frontend-tasktrec-mfkw613e0-nsamedaisy.vercel.app/dashboard"
-        );
+         return res.redirect(`${process.env.FRONTEND_ADDRESS}/dashboard`);
       }
     );
   }),

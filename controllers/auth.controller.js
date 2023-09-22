@@ -305,7 +305,7 @@ module.exports = {
     console.log("in the refresh controller", authHeader);
     
  console.log("in the refresh before authHeader check");
-    if (!authHeader?.startsWith("Bearer ")) {
+    if (!authHeader?.startsWith("Bearer")) {
       return res.status(401).send("UnAuthorized. no start with bearer");
     }
 
@@ -342,7 +342,7 @@ module.exports = {
 
         if (!foundUser) {
           return res
-            .status(401)
+            .status(404)
             .json({ message: "No user found for refresh. UnAuthorized" });
         }
 
