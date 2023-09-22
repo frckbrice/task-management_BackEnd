@@ -1,4 +1,4 @@
-const { Project, Member, Team, Task, EmailAddress } =
+const { Project, Member, Team, Task, EmailAddress, Invitation } =
   require("../models").models;
 const { Op } = require("sequelize");
 const asyncHandler = require('express-async-handler');
@@ -9,7 +9,7 @@ module.exports = {
   //@route GET /project
   //access Private
 
-  getAllProject: asyncHandler(async (req, res) => {
+  getAllUserProject: asyncHandler(async (req, res) => {
 
     //get all projects for the authenticated user
     const email = req.email;
@@ -19,7 +19,7 @@ module.exports = {
       }
     })
 
-    console.log('\n\n', emailAuth)
+    console.log('\n\n', {emailAuth})
 
     if(emailAuth) {
      Project.findAll({
@@ -27,7 +27,7 @@ module.exports = {
          projectManagerId: emailAuth.projectManagerId,
        }
      }).then((data) => {
-       console.log(data);
+       console.log({project_data: data});
        if (!data.length) {
          return res.status(400).json({ message: "No projects found" });
        }
@@ -46,37 +46,44 @@ module.exports = {
     // get the id of the project
     const { id } = req.body;
 
+    console.log('\n\n in the get project members')
+    console.log(id)
+
+
     if (!id) return res.status(400).json({ message: " project Id is needed" });
 
-    // const targetProject = await Project.findByPk(id, {
-    //   include: Team,
-    // });
-    const targetProject = await Project.findByPk(id);
-    if (!targetProject)
+    const projectInvitation = await Invitation.findAll({
+      where: {
+        projectId: id,
+      },
+    });
+
+    console.log("\n\n", { projectInvitation });
+    if (!projectInvitation)
       return res.status(400).json({ message: "This project doesn't exist" });
 
-    const projectTeam = await targetProject.getTeam();
-    if (!projectTeam)
-      return res
-        .status(404)
-        .json({ message: "This project dont have a team in charge" });
+    // const projectTeam = await targetProject.getTeam();
+    // if (!projectTeam)
+    //   return res
+    //     .status(404)
+    //     .json({ message: "This project dont have a team in charge" });
 
-    const projectMember = (
-      await projectTeam.getMembers({
-        attributes: ["username"],
-        raw: true,
-      })
-    ).map((member) => member.username);
+    // const projectMember = (
+    //   await projectTeam.getMembers({
+    //     attributes: ["username"],
+    //     raw: true,
+    //   })
+    // ).map((member) => member.username);
 
-    if (!projectMember.length)
-      return res
-        .status(404)
-        .json({ message: "This project's team doesn't have members" });
+    // if (!projectMember.length)
+    //   return res
+    //     .status(404)
+    //     .json({ message: "This project's team doesn't have members" });
 
-    res.json({
-      message: `List of member associated to project${targetProject.name}`,
-      projectMember,
-    });
+    // res.json({
+    //   message: `List of member associated to project${targetProject.name}`,
+    //   projectMember,
+    // });
   }),
 
   //@desc create project
@@ -196,7 +203,7 @@ module.exports = {
   //@desc update a project
   //@route PATCH /projects
   //access Private
-  updateProject: async (req, res) => {
+  updateProject: asyncHandler(async (req, res) => {
     const {
       id,
       name,
@@ -240,12 +247,12 @@ module.exports = {
 
     const updatedProject = await existingProject.save();
     if (updatedProject) res.json({ msg: `user successfully updated` });
-  },
+  }),
 
   //@desc delete a project
   //@route DELETE /projects
   //access Private
-  deleteProject: async (req, res) => {
+  deleteProject: asyncHandler(async (req, res) => {
     const { id } = req.body;
 
     if (!id) {
@@ -268,5 +275,43 @@ module.exports = {
         .status(201)
         .json({ message: `The project with id ${id} deleted successfully` });
     }
-  },
+  }),
+
+//@desc get all collaboration projects
+  //@route GET /project/collaborations
+  //access Private
+
+  projectCollaborations:  asyncHandler(async(req, res) => {
+
+   //get all projects for the authenticated user
+    const email = req.email;
+    const emailAuth = await EmailAddress.findOne({
+      where: {
+        designation: email,
+      }
+    })
+
+    console.log('\n\n il the collaborations handler')
+    console.log('\n\n', {emailAuth})
+
+    if(emailAuth) {
+     Project.findAll({
+       where: {
+         projectManagerId: emailAuth.projectMemberId,
+       }
+     }).then((data) => {
+       console.log({project_data: data});
+       if (!data.length) {
+         return res.status(400).json({ message: "No projects found" });
+       }
+       res.json(data);
+     });
+    }else {
+      return res.redirect('http://localhost:3000/login');
+    }
+
+  }),
+
+
+
 };
