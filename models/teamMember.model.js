@@ -1,17 +1,32 @@
+const {Member} = require('./member.model')
+const { Team } = require("./team.model")
+
 module.exports = (sequelize, DataTypes) => {
   const TeamMember = sequelize.define(
     "teamMember",
     {
-      id: {
+      projectMemberId: {
         type: DataTypes.UUID,
-        primaryKey: true,
+        references: {
+          model: Member,
+          key: "id",
+        },
       },
-      start_date: DataTypes.DATE,
-      end_date: DataTypes.DATE,
-      team_member_observation: DataTypes.STRING,
+      projectTeamId: {
+        type: DataTypes.UUID,
+        references: {
+          model: Team, 
+          key: "id",
+        },
+      },
+      memberRole: {
+        type: DataTypes.STRING,
+        defaultValue: "manager"
+      },
+      observation: DataTypes.STRING,
     },
     {
-      timestamps: false,
+      // timestamps: false,
     }
   );
 

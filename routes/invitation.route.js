@@ -14,7 +14,7 @@ router
   .delete(invitatationContoller.deleteInvitation);
 
 router  
-  .route('/:id')
-  .get(invitatationContoller.handleInvite)
+  .route('/confirm')
+  .post(invitatationContoller.handleInvite)
 
 module.exports = router;

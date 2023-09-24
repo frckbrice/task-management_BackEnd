@@ -32,7 +32,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: true,
       },
       role: {
-        type: DataTypes.ENUM("admin", "manager", "invitee"),
+        type: DataTypes.STRING,
         allowNull: false,
         defaultValue: "manager",
       },
@@ -48,10 +48,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: true,
       },
-      teamId: {
-        type: DataTypes.UUID,
-        allowNull: true,
-      },
+      // teamId: {
+      //   type: DataTypes.UUID,
+      //   allowNull: true,
+      // },
     },
     {
       validate: {

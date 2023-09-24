@@ -338,6 +338,7 @@ module.exports = {
           },
         });
 
+        console.log('\n\n in the refresh')
         console.log(foundUser);
 
         if (!foundUser) {

@@ -22,3 +22,14 @@ router
   .get(projectController.projectCollaborations);
 
 module.exports = router;
+
+
+
+/*{
+    path: "foodDetails/:foodId",
+    element: <FoodDetail />,
+    errorElement: <ErrorPage />,
+
+
+    <Link to={`/foodDetails/${props.id}`}>
+  },*/
