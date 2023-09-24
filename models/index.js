@@ -36,6 +36,10 @@ db.models.ProjectStatus = require("./projectStatus.model")(
   sequelize,
   Sequelize.DataTypes
 );
+db.models.TeamMember = require("./teamMember.model")(
+  sequelize,
+  Sequelize.DataTypes
+);
 
 const {
   Project,
@@ -47,6 +51,7 @@ const {
   EmailAddress,
   TaskMember,
   ProjectStatus,
+  TeamMember,
 } = db.models;
 
 db.sequelize = sequelize;
@@ -76,8 +81,10 @@ Task.belongsTo(Project);
 Task.belongsToMany(Member, { through: TaskMember, uniqueKey: "TaskMemberId" });
 Member.belongsToMany(Task, { through: TaskMember, uniqueKey: "TaskMemberId" });
 
-Member.belongsTo(Team);
-Team.hasMany(Member, {as: 'teamMember', foreignKey: "teamId"});
+
+Team.belongsToMany(Member, { through: TeamMember});
+Member.belongsToMany(Team, { through: TeamMember});
+
 
 Member.hasMany(Invitation, { foreignKey: "projectManagerId" });
 Invitation.belongsTo(Member, {

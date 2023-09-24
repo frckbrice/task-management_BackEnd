@@ -1,8 +1,9 @@
-const { Project, Member, Team, Task, EmailAddress, Invitation } =
+const { Project, Member, Team, Task, EmailAddress, Invitation, TeamMember } =
   require("../models").models;
 const { Op } = require("sequelize");
-const asyncHandler = require('express-async-handler');
+const asyncHandler = require("express-async-handler");
 const bcrypt = require("bcrypt");
+const { sequelize } = require("../models");
 
 module.exports = {
   //@desc get all project
@@ -10,33 +11,49 @@ module.exports = {
   //access Private
 
   getAllUserProject: asyncHandler(async (req, res) => {
-
     //get all projects for the authenticated user
     const email = req.email;
-    const emailAuth = await EmailAddress.findOne({
-      where: {
-        designation: email,
+    let emailAuth;
+    let user;
+    if (email) {
+      emailAuth = await EmailAddress.findOne({
+        where: {
+          designation: email,
+        },
+      });
+      if (emailAuth) {
+        Project.findAll({
+          where: {
+            projectManagerId: emailAuth.projectManagerId,
+          },
+        }).then((data) => {
+          console.log({ project_data: data });
+          if (!data.length) {
+            return res.status(400).json({ message: "No projects found" });
+          }
+          res.json(data);
+        });
       }
-    })
-
-    console.log('\n\n', {emailAuth})
-
-    if(emailAuth) {
-     Project.findAll({
-       where: {
-         projectManagerId: emailAuth.projectManagerId,
-       }
-     }).then((data) => {
-       console.log({project_data: data});
-       if (!data.length) {
-         return res.status(400).json({ message: "No projects found" });
-       }
-       res.json(data);
-     });
-    }else {
-      return res.redirect('http://localhost:3000/login');
+    } else if (req.user) {
+      user = await Member.findOne({
+        where: {
+          username: req.user,
+        },
+      });
+      Project.findAll({
+        where: {
+          projectManagerId: user.id,
+        },
+      }).then((data) => {
+        console.log({ project_data: data });
+        if (!data.length) {
+          return res.status(400).json({ message: "No projects found" });
+        }
+        res.json(data);
+      });
+    } else {
+      return res.redirect("http://localhost:3000/login");
     }
-
   }),
 
   //@desc get all project members
@@ -46,44 +63,39 @@ module.exports = {
     // get the id of the project
     const { id } = req.body;
 
-    console.log('\n\n in the get project members')
-    console.log(id)
-
+    console.log("\n\n in the get project members");
+    console.log(id);
 
     if (!id) return res.status(400).json({ message: " project Id is needed" });
 
-    const projectInvitation = await Invitation.findAll({
+    const targetProject = await Project.findByPk(id);
+
+    const teamOfProject = await Team.findOne({
       where: {
         projectId: id,
       },
     });
 
-    console.log("\n\n", { projectInvitation });
-    if (!projectInvitation)
-      return res.status(400).json({ message: "This project doesn't exist" });
+    if (!teamOfProject)
+      return res.status(400).json({ message: "No Team for this project" });
 
-    // const projectTeam = await targetProject.getTeam();
-    // if (!projectTeam)
-    //   return res
-    //     .status(404)
-    //     .json({ message: "This project dont have a team in charge" });
+    const projectMembers = await teamOfProject.getProjectMembers({
+      joinTableAttributes: [],
+    });
+    console.log("\n\n" );
+    console.log(projectMembers);
+ 
 
-    // const projectMember = (
-    //   await projectTeam.getMembers({
-    //     attributes: ["username"],
-    //     raw: true,
-    //   })
-    // ).map((member) => member.username);
+    console.log("\n\n");
+    console.log({ teamOfProject, projectMembers, targetProject });
 
-    // if (!projectMember.length)
-    //   return res
-    //     .status(404)
-    //     .json({ message: "This project's team doesn't have members" });
+    if (!projectMembers)
+      return res.status(400).json({ message: "No member for this project" });
 
-    // res.json({
-    //   message: `List of member associated to project${targetProject.name}`,
-    //   projectMember,
-    // });
+    res.json({
+      message: `List of member associated to project${targetProject.name}`,
+      projectMembers,
+    });
   }),
 
   //@desc create project
@@ -113,11 +125,9 @@ module.exports = {
 
     console.log("\n\n");
 
-    if (!name || !description || !estimateEndDate || !startDate) {
-      return res.json({ message: "All fields are required" });
+    if (!name || !description || !estimateEndDate || !startDate || !teamName) {
+      return res.status(400).json({ message: "All fields are required" });
     }
-
-    console.log({ user: req.user });
 
     const duplicates = await Project.findOne({
       where: {
@@ -126,8 +136,6 @@ module.exports = {
     });
 
     if (duplicates) {
-      console.log("\n\n");
-      console.log({ duplicates });
       return res.status(409).json({ message: `${name} already exists` });
     }
 
@@ -185,7 +193,31 @@ module.exports = {
           if (newTeam) {
             console.log("\n\n team also created successfully", newTeam);
 
-            return res.status(201).json({
+            console.log(
+              "\n\nadding project Manager as default member of the project"
+            );
+            const member = await Member.findOne({
+              id: pmId,
+            });
+
+            if (member) {
+              const teamMember = await TeamMember.create({
+                projectMemberId: member.id,
+                projectTeamId: newTeam.id,
+              });
+
+              if (!teamMember)
+                return res.status(500).json({
+                  message: "Error creating team member role",
+                });
+            } else {
+              return res.status(400).json({
+                message:
+                  "No manager for this project. Check what's goind wrong",
+              });
+            }
+
+            return res.json({
               message: `The project ${name} successfully created`,
               data,
             });
@@ -277,41 +309,44 @@ module.exports = {
     }
   }),
 
-//@desc get all collaboration projects
+  //@desc get all collaboration projects
   //@route GET /project/collaborations
   //access Private
 
-  projectCollaborations:  asyncHandler(async(req, res) => {
-
-   //get all projects for the authenticated user
-    const email = req.email;
-    const emailAuth = await EmailAddress.findOne({
+  projectCollaborations: asyncHandler(async (req, res) => {
+    // get all projects for the authenticated user
+    const member = await Member.findOne({
       where: {
-        designation: email,
-      }
-    })
+        username: req.user,
+      },
+    });
 
-    console.log('\n\n il the collaborations handler')
-    console.log('\n\n', {emailAuth})
+    if (!member) return res.status(500).json({ message: "Server Error" });
 
-    if(emailAuth) {
-     Project.findAll({
-       where: {
-         projectManagerId: emailAuth.projectMemberId,
-       }
-     }).then((data) => {
-       console.log({project_data: data});
-       if (!data.length) {
-         return res.status(400).json({ message: "No projects found" });
-       }
-       res.json(data);
-     });
-    }else {
-      return res.redirect('http://localhost:3000/login');
-    }
+    const teamscollaborations = await member.getProjectTeams({
+      where: {
+        "$teamMember.memberRole$": "invitee",
+      },
+      include: [
+        {
+          model: Project,
+        },
+      ],
+      joinTableAttributes: [],
+    });
+
+    if (!teamscollaborations.length) return res.status(204);
+
+    //for each project retrieve the project in charge
+    const projects = teamscollaborations?.map((team) => team.project);
+
+    console.log("\n\n");
+    console.log(teamscollaborations);
+    console.log("\n\n");
+    console.log(projects);
+
+  
+    return res.json(projects);
 
   }),
-
-
-
 };

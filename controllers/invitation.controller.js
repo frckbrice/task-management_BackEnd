@@ -1,4 +1,4 @@
-const { Task, Member, Invitation, Project, EmailAddress } =
+const { Task, Member, Invitation, Project, EmailAddress, Team, TeamMember } =
   require("../models").models;
 const { Op } = require("sequelize");
 const nodemailer = require("nodemailer");
@@ -56,8 +56,7 @@ module.exports = {
       projectId: projectToken,
       projectManagerId: concernedProject.projectManagerId,
       notified: true,
-      content: emailContent,
-      
+      content: prjectsummary,
     }).catch((err) => console.log(err));
 
     console.log("\n\n after the level of invitation creation");
@@ -75,11 +74,12 @@ module.exports = {
           console.log("\n\nemails stored successfully\n");
         })
         .catch((err) => {
-          console.log("\n\nfaile to store email\n", err);
+          console.log("\n\nFailed to store email\n", err);
         });
     }
 
     const newContent = `${emailContent}invitation/${newInvitation.id}`;
+    // const newContent = `http://localhost:3000/invitation/${newInvitation.id}`;
 
     console.log(newContent);
     const transporter = nodemailer.createTransport({
@@ -98,7 +98,7 @@ module.exports = {
     } else {
       subject = `INVITATION TO TAKE PART TO THE PROJECT ${projectname}`;
     }
-    
+
     mailOptions = {
       from: "maebrie2017@gmail.com",
       to: emails,
@@ -118,7 +118,7 @@ module.exports = {
         });
       }
     });
-
+    //* code to handle multiple email addresses
     // if (newInvitation && emails.includes(","))
     // to create email array
     //   const emailArr = emails.split(",");
@@ -194,82 +194,128 @@ module.exports = {
   //@access private
 
   handleInvite: asyncHandler(async (req, res) => {
-    const { id } = req.params;
+    const { name, contact, skills, accepted, invitationId } = req.body;
+
+    console.log("\n\n", { name, contact, skills, accepted, invitationId });
 
     // fetch the invite for the token
-    const existingInvitation = await Invitation.findByPk(id);
+    const existingInvitation = await Invitation.findByPk(invitationId);
 
     if (!existingInvitation) {
       console.log("this invitation doesn't exist");
-      return res.status(400).send({ message: " Invitation not valid" });
+      return res
+        .status(401)
+        .send({ message: " Invitation not valid. UnAuthorized" });
     }
 
     //check if the user is registered
     const inviteEmail = await EmailAddress.findOne({
       where: {
-        invitationId: existingInvitation.id,
-      }
-    })
+        invitationId,
+      },
+    });
 
-// if not register redirect to register page
+    console.log("\n\n");
+    console.log({ inviteEmail });
+    // if not invited redirect to register page
     if (!inviteEmail) {
+      return res.redirect(302, `${process.env.FRONTEND_ADDRESS}`);
+    }
+
+    if (inviteEmail && !accepted) {
+      return res.json({
+        message: "Thanks for your time. We hope you will accept next invite.",
+      });
+    }
+
+    //if invited, check if it exists
+    const registeredUserEmail = await EmailAddress.findOne({
+      where: {
+        designation: inviteEmail.invitationEmail,
+      },
+    });
+
+    console.log("\n\n", { registeredUserEmail });
+
+    if (!registeredUserEmail) {
+      return res.redirect(302, `${process.env.FRONTEND_ADDRESS}/signup`);
+    }
+
+    //if registerd,
+    //check if the user is logged in
+    const { email, user } = req;
+    if (!user) {
+      return res.redirect(`${process.env.FRONTEND_ADDRESS}/login`);
+    }
+    //add the logged in user to the team of the project
+    const concernedProject = await Project.findByPk(
+      existingInvitation.projectId
+    );
+
+    console.log("\n\n", { concernedProject });
+
+    if (!concernedProject) {
+      return res.status(400).json({
+        message: "No Project associated to this invitation",
+      });
+    }
+
+    const member = await Member.findOne({
+      where: {
+        username: user,
+      },
+    });
+
+    if (!member) {
       return res.redirect(`${process.env.FRONTEND_ADDRESS}/signup`);
     }
 
-    //check if the user is logged in
-    const authHeader = req.headers.Authorization || req.headers.authorization;
+    const projectTeam = await Team.findOne({
+      where: {
+        projectId: concernedProject.id,
+      },
+    });
 
-    if(!authHeader.startsWith('Bearer'))
-      return res.redirect(`${process.env.FRONTEND_ADDRESS}/login`);
-    
+    console.log("\n\n in the verify", { projectTeam });
 
-    //add the logged in user to the team of the project
-    const concernedProject = Project.findByPk(existingInvitation.projectId);
-
-    if (!concernedProject) {
-      return res
-        .status(400)
-        .json({ message: "Sorry, No Project to associate with" });
+    if (!projectTeam) {
+      return res.redirect(`${process.env.FRONTEND_ADDRESS}`);
     }
 
-    const refreshToken = authHeader.split(' ')[1];
-    // get the logged in user info
-    jwt.verify(
-      refreshToken,
-      process.env.REFRESH_TOKEN_SECRETKEY,
-      async (err, rightuser) => {
-        if (err) {
-         return res.redirect(`${process.env.FRONTEND_ADDRESS}/login`);
-        }
+    member.contact = contact;
+    member.skills = skills;
+    member.name = name;
+    await member.save();
 
-        const member = Member.findOne({
-          where: {
-            username: rightuser.username,
-          },
-        });
+    existingInvitation.accepted = accepted;
+    await existingInvitation.save();
 
-        if (!member) {
-          return res.redirect(`${process.env.FRONTEND_ADDRESS}/signup`);
-        }
+    registeredUserEmail.projectMemberId = member.id;
+    await registeredUserEmail.save();
 
-        const projectTeam = await Team.findOne({
-          where: {
-            projectId: concernedProject.id,
-          }
-        })
+    const teamMember = await TeamMember.findOne({
+      where: {
+        projectMemberId: member.id,
+        projectTeamId: projectTeam.id,
+      },
+    });
 
-        if(!projectTeam) {
-           return res.redirect(`${process.env.FRONTEND_ADDRESS}`);
-        }
+    if (!teamMember)
+      return res.status(500).json({
+        message: "Error creating team member role",
+      });
 
-        member.projectId = projectTeam.id;
-        member.save();
+    teamMember.memberRole = 'invitee';
 
-        existingInvitation.accepted = true;
-        existingInvitation.save();
+    await teamMember.save();
 
-         return res.redirect(`${process.env.FRONTEND_ADDRESS}/dashboard`);
-      }
-    );
+    console.log("\n\n in the verify", { member });
+    console.log("\n\n in the verify", { registeredUserEmail });
+    console.log("\n\n in the verify", { existingInvitation });
+    console.log("\n\n in the verify", { teamMember });
+
+    return res
+      .status(200)
+      .redirect(`${process.env.FRONTEND_ADDRESS}/dashboard`);
   }),
 };
