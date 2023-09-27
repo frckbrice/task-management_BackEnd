@@ -13,4 +13,12 @@ router
   .patch(taskController.updateTask)
   .delete(taskController.deleteTask);
 
+router
+  .route("/onboarding")
+  .post(taskController.createTaskOnboarding);
+
+router
+  .route("/assignToMember")
+  .post(taskController.assignTaskTomember);
+
 module.exports = router;

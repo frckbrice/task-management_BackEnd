@@ -30,7 +30,7 @@ module.exports = {
     console.log({ projectToken, emails, emailContent });
 
     if (!projectToken || !emails || !emailContent) {
-      return res.json({ message: "All fields are required" });
+      return res.status(400).json({ message: "All fields are required" });
     }
 
     // look for the concerned project description

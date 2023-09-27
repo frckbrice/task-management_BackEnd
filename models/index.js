@@ -59,8 +59,8 @@ db.sequelize = sequelize;
 ProjectStatus.hasMany(Task);
 Task.belongsTo(ProjectStatus);
 
-ProjectStatus.belongsTo(Project);
 Project.hasMany(ProjectStatus);
+ProjectStatus.belongsTo(Project);
 
 //  Member.hasOne()
 Task.hasMany(Updates);
@@ -75,8 +75,8 @@ Project.belongsTo(Member, {
   foreignKey: "projectManagerId",
 });
 
-Project.hasMany(Task);
-Task.belongsTo(Project);
+// Project.hasMany(Task);
+// Task.belongsTo(Project);
 
 Task.belongsToMany(Member, { through: TaskMember, uniqueKey: "TaskMemberId" });
 Member.belongsToMany(Task, { through: TaskMember, uniqueKey: "TaskMemberId" });

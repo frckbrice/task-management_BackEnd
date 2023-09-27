@@ -8,11 +8,13 @@ router.use(verifyJwt);
 
 router
   .route("/")
-  .get(projectStatusController.getAllProjectStatus)
+  // .get(projectStatusController.getAllProjectStatus)
   .post(projectStatusController.createProjectStatus)
   .patch(projectStatusController.updateProjectStatus)
   .delete(projectStatusController.deleteProjectStatus);
 
-// router.route("").get(projectController.getProjectMembers);
+router
+  .route("/ofproject")
+  .post(projectStatusController.getAllProjectStatus);
 
 module.exports = router;
