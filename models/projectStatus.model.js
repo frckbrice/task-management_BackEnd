@@ -11,11 +11,11 @@ module.exports = (sequelize, DataTypes) => {
       allowNull:false,
       defaultValue: 'todo'
     },
-    color: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    positionInTheList: DataTypes.TINYINT,
+    // color: {
+    //   type: DataTypes.STRING,
+    //   allowNull: false,
+    // },
+    // positionInTheList: DataTypes.TINYINT,
     projectId: {
       type: DataTypes.UUID,
       allowNull: false,

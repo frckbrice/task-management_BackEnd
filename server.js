@@ -41,6 +41,7 @@ app.use("/updates", require("./routes/updates.routes"));
 app.use("/teams", require("./routes/team.routes"));
 app.use("/auth", require("./routes/auth.route"));
 app.use("/invitation", require("./routes/invitation.route"));
+app.use("/projectstatus", require("./routes/projectstatus.route"));
 
 // add & configure middleware
 // app.use(
@@ -50,14 +51,13 @@ app.use("/invitation", require("./routes/invitation.route"));
 //       console.log(req.sessionID);
 //       console.log(req.session);
 //       return uuid(); // use UUIDs for session IDs
-      
+
 //     },
 //     secret: "keyboard cat",
 //     resave: false,
 //     saveUninitialized: true,
 //   })
 // );
-
 
 // app.use(passport.initialize());
 // app.use(passport.session());
@@ -67,7 +67,7 @@ app.use(errorHandler);
 
 (async () => {
   await db.sequelize
-    .sync({ alter: true})
+    .sync({ alter: true })
     .then(() => {
       console.log("\n\ndatabase connected successfully\n\n");
     })
