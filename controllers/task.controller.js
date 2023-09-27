@@ -1,4 +1,4 @@
-const { Task, Member, Team, Project, Updates, TaskMember } =
+const { Task, Member, Team, Project, Updates, TaskMember, ProjectStatus } =
   require("../models").models;
 const { Op } = require("sequelize");
 const asyncHandler = require("express-async-handler");
@@ -48,11 +48,19 @@ module.exports = {
       return res.status(409).json({ message: `${name} already exists` });
     }
 
+    const taskStatus = await ProjectStatus.create({
+      designation: 'backLog',
+      projectId,
+    });
+
+    if(!taskStatus) 
+      return res.status(500).json({ message:'Failed! Server error'});
+
     const uniformTask = {
       name,
       description,
       projectId,
-      projectStatusId: uuid(),
+      projectStatusId: taskStatus.id,
     };
 
     Task.create(uniformTask)
@@ -175,6 +183,8 @@ module.exports = {
   //access Private
   deleteTask: asyncHandler(async (req, res) => {
     const { id } = req.body;
+
+    console.log('in deleting task backend', {id})
 
     if (!id) {
       return res.status(400).json({ message: "task Id required" });
