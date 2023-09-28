@@ -80,6 +80,9 @@ module.exports = {
       return res.status(400).json({ message: "No Team for this project" });
 
     const projectMembers = await teamOfProject.getProjectMembers({
+      attributes: {
+        exludes : ['password']
+      },
       joinTableAttributes: [],
     });
     console.log("\n\n" );

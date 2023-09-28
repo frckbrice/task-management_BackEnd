@@ -287,13 +287,19 @@ module.exports = {
       return res.status(204);
     }
 
-    res.clearCookie("jwt", {
-      httpOnly: true,
-      sameSite: "None",
-      secure: true,
-    });
+    // res.clearCookie("jwt", {
+    //   httpOnly: true,
+    //   sameSite: "None",
+    //   secure: true,
+    // });
 
-    res.json({ message: "cookie cleared successfully" });
+    const accessToken = '', refreshToken = '';
+
+    res.json({
+      message: "cookie cleared successfully",
+      accessToken,
+      refreshToken,
+    });
   }),
 
   //@desc Refresh

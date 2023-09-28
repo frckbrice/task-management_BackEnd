@@ -21,4 +21,8 @@ router
   .route("/assignToMember")
   .post(taskController.assignTaskTomember);
 
+router
+  .route("/updatOnDrag&Drop")
+  .post(taskController.updateOnStatusChange);
+
 module.exports = router;
