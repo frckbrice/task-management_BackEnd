@@ -213,6 +213,7 @@ module.exports = {
       where: {
         invitationId,
       },
+      // attributes: ["invitationEmail", "designation"],
     });
 
     console.log("\n\n");
@@ -237,7 +238,7 @@ module.exports = {
 
     console.log("\n\n", { registeredUserEmail });
 
-    if (!registeredUserEmail) {
+    if (!inviteEmail.invitationEmail) {
       return res.redirect(302, `${process.env.FRONTEND_ADDRESS}/signup`);
     }
 
@@ -262,9 +263,11 @@ module.exports = {
 
     const member = await Member.findOne({
       where: {
-        username: user,
+        id: registeredUserEmail.projectManagerId,
       },
     });
+
+    console.log("\n\n in the verify", member);
 
     if (!member) {
       return res.redirect(`${process.env.FRONTEND_ADDRESS}/signup`);
@@ -276,7 +279,7 @@ module.exports = {
       },
     });
 
-    console.log("\n\n in the verify", { projectTeam });
+    console.log("\n\n in the verify", projectTeam);
 
     if (!projectTeam) {
       return res.redirect(`${process.env.FRONTEND_ADDRESS}`);
@@ -293,29 +296,111 @@ module.exports = {
     registeredUserEmail.projectMemberId = member.id;
     await registeredUserEmail.save();
 
-    const teamMember = await TeamMember.findOne({
-      where: {
-        projectMemberId: member.id,
-        projectTeamId: projectTeam.id,
-      },
-    });
+    const newMember = {
+      projectMemberId: member.id,
+      projectTeamId: projectTeam.id,
+      memberRole: "invitee",
+    };
 
-    if (!teamMember)
+    const newAdded = await Member.create(newMember);
+
+    console.log("\n\n");
+    console.log(newMember);
+
+    if (!newAdded)
       return res.status(500).json({
         message: "Error creating team member role",
       });
+    // console.log("\n\n at the level of registeredUserEmail");
+    //   teamMember.memberRole = "invitee";
 
-    teamMember.memberRole = 'invitee';
-
-    await teamMember.save();
+    //   await teamMember.save();
 
     console.log("\n\n in the verify", { member });
     console.log("\n\n in the verify", { registeredUserEmail });
     console.log("\n\n in the verify", { existingInvitation });
-    console.log("\n\n in the verify", { teamMember });
+    console.log("\n\n in the verify", { newAdded });
 
-    return res
-      .status(200)
-      .redirect(`${process.env.FRONTEND_ADDRESS}/dashboard`);
+    return res.json({
+      message: "Member added successfully to the project",
+      location: "http://localhost:3000/dashboard",
+    });
+  }),
+
+  handlenotifications: asyncHandler(async (req, res) => {
+    const { user, email } = req;
+
+    console.log({ email, user });
+
+    if (email) {
+      const targetEmails = await EmailAddress.findOne({
+        where: {
+          invitationEmail: email,
+        },
+        include: {
+          model: Invitation,
+          where: {
+            accepted: false,
+          },
+        },
+      });
+
+      console.log("\n\ntargetEmails");
+      console.log(targetEmails);
+
+      if (!targetEmails.length) {
+        return res.status(204);
+      }
+
+      const invitations = targetEmails.invitations;
+
+      return res.json(invitations);
+    } else if (user) {
+      const targetUser = await Member.findOne({
+        where: {
+          username: user,
+        },
+      });
+
+      if (!targetUser) {
+        return res.status(400).json({ message: "No such targetUser" });
+      }
+
+      const targetEmail = await EmailAddress.findOne({
+        where: {
+          [Op.or]: {
+            projectManagerId: targetUser.id,
+            projectMemberId: targetUser.id,
+          },
+        },
+      });
+
+      console.log("\n\ntargetEmail");
+      console.log(targetEmail);
+
+      if (!targetEmail) {
+        return res.status(400).jsom({ message: "No such email for the user" });
+      }
+
+      const invitations = await targetEmail.getInvitations({
+        where: {
+          accepted: false,
+          notified: true,
+        },
+        include: {
+          model: Project,
+          required: true,
+        },
+      });
+
+      console.log("\n\ninvitations");
+      console.log(invitations);
+
+      if (!invitations.length) {
+        return res.status(400).json({ message: "No invitations" });
+      }
+
+      res.json(invitations);
+    }
   }),
 };

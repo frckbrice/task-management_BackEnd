@@ -17,4 +17,6 @@ router
   .route('/confirm')
   .post(invitatationContoller.handleInvite)
 
+router.route("/notifications").get(invitatationContoller.handlenotifications);  
+
 module.exports = router;
