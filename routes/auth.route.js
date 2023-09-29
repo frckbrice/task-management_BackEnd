@@ -9,8 +9,6 @@ const isAuth = require("../middleware/auth");
 //* to be added. do not forget to handle the failureRedirect/successRedirect below
 // router.route("/").post(loginLimiter, authController.login);
 
-
-
 router
   .route("/login/google")
   .get(passport.authenticate("google", { scope: ["profile", "email"] }));
