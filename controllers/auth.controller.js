@@ -57,7 +57,7 @@ module.exports = {
 
     await duplicates.save();
 
-    res.json({ email });
+    res.json( email );
   }),
 
   //@desc register
