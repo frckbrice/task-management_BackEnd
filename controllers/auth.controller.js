@@ -197,6 +197,8 @@ module.exports = {
       }
     );
 
+    console.log(accessToken, refreshToken);
+
     res.cookie("jwt", refreshToken, {
       httpOnly: true,
       // secure: true,
