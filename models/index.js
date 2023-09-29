@@ -75,8 +75,6 @@ Project.belongsTo(Member, {
   foreignKey: "projectManagerId",
 });
 
-// Project.hasMany(Task);
-// Task.belongsTo(Project);
 
 Task.belongsToMany(Member, { through: TaskMember, uniqueKey: "TaskMemberId" });
 Member.belongsToMany(Task, { through: TaskMember, uniqueKey: "TaskMemberId" });

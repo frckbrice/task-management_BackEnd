@@ -211,7 +211,7 @@ module.exports = {
     const { email } = req.body;
 
     console.log("\n\nemail");
-    console.log({ email });
+    console.log( email );
 
     if (!email) {
       return res.status(400).json({ message: "email required" });
