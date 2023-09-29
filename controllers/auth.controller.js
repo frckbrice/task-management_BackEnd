@@ -120,7 +120,7 @@ module.exports = {
   login: asyncHandler(async (req, res) => {
     const { email, password } = req.body;
 
-    console.log("\n\n" + { email, password } + "\n\n");
+    // console.log("\n\n" + { email, password } + "\n\n");
 
     if (!email || !password) {
       return res.status(400).json({ message: "All the fields are required" });
@@ -133,8 +133,8 @@ module.exports = {
       },
     });
 
-    console.log("\n");
-    console.log({ foundUserID: existingEmail.projectMemberId });
+    // console.log("\n");
+    // console.log({ foundUserID: existingEmail.projectMemberId });
 
     if (!existingEmail) {
       console.log("%c not existing emailaddress: UnAuthorized", "tomato");
@@ -145,9 +145,9 @@ module.exports = {
     //look for the person owner of that email
     const foundUser = await Member.findByPk(existingEmail.projectManagerId);
 
-    console.log('\n\n');
-    console.log( foundUser );
-    console.log("\n\n");
+    // console.log('\n\n');
+    // console.log( foundUser );
+    // console.log("\n\n");
 
     //* is active is usefull to deactivate/remove a user from the app project
     if (!foundUser || !foundUser.isActive) {
@@ -173,7 +173,7 @@ module.exports = {
       email: email,
     };
 
-    console.log( userInfo );
+    // console.log( userInfo );
 
     //*create token
     const accessToken = jwt.sign(
@@ -197,7 +197,7 @@ module.exports = {
       }
     );
 
-    console.log(accessToken, refreshToken);
+    // console.log(accessToken, refreshToken);
 
     res.cookie("jwt", refreshToken, {
       httpOnly: true,
@@ -212,8 +212,8 @@ module.exports = {
   googleLogin: asyncHandler(async (req, res) => {
     const { email } = req.body;
 
-    console.log("\n\nemail");
-    console.log( email );
+    // console.log("\n\nemail");
+    // console.log( email );
 
     if (!email) {
       return res.status(400).json({ message: "email required" });
@@ -224,17 +224,17 @@ module.exports = {
         designation: email,
       },
     });
-    console.log("\n\nexistingEmail");
-    console.log(existingEmail );
+    // console.log("\n\nexistingEmail");
+    // console.log(existingEmail );
 
-    console.log("\n\nfoundUserID");
-    console.log({ foundUserID: existingEmail.projectManagerId });
+    // console.log("\n\nfoundUserID");
+    // console.log({ foundUserID: existingEmail.projectManagerId });
 
     //look for the person owner of that email
     const foundUser = await Member.findByPk(existingEmail.projectManagerId);
 
-    console.log("\n\nfoundUser");
-    console.log({ foundUser });
+    // console.log("\n\nfoundUser");
+    // console.log({ foundUser });
 
     const userInfo = {
       username: foundUser?.username,
@@ -243,8 +243,8 @@ module.exports = {
       picture: foundUser?.picture,
     };
 
-    console.log("\n\nuserInfo for the token ");
-    console.log( userInfo );
+    // console.log("\n\nuserInfo for the token ");
+    // console.log( userInfo );
 
     //*create token
     const accessToken = jwt.sign(
@@ -310,21 +310,21 @@ module.exports = {
   refresh: asyncHandler(async (req, res, next) => {
     const authHeader = req.headers.authorization || req.headers.Authorization;
 
-    console.log("in the refresh controller", authHeader);
+    // console.log("in the refresh controller", authHeader);
     
  console.log("in the refresh before authHeader check");
     if (!authHeader?.startsWith("Bearer")) {
       return res.status(401).send("UnAuthorized. no start with bearer");
     }
 
-     console.log("in the refresh after authHeader check");
+    //  console.log("in the refresh after authHeader check");
 
     const refreshToken = authHeader.split(" ")[1];
    
 
-    console.log('\n\n ');
-    console.log("refreshToken", refreshToken);
-     console.log("\n");
+    // console.log('\n\n ');
+    // console.log("refreshToken", refreshToken);
+    //  console.log("\n");
 
     if (!refreshToken) {
       return res.status(401).json({ message: "UnAuthorized. no refresh token" });
