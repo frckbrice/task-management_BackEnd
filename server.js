@@ -16,6 +16,8 @@ const verifyJwt = require("./middleware/verifyJwt");
 
 const PORT = process.env.PORT || 4000;
 const app = express();
+app.set("trust proxy", 1);
+
 
 app.use(logger);
 app.use(cors(corsOptions));
