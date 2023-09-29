@@ -220,7 +220,10 @@ module.exports = {
     console.log({ inviteEmail });
     // if not invited redirect to register page
     if (!inviteEmail) {
-      return res.redirect(302, `${process.env.FRONTEND_ADDRESS}`);
+     return res.json({
+       message: "No valid email addresses for this invitation",
+       location: `${process.env.FRONTEND_ADDRESS}`,
+     });
     }
 
     if (inviteEmail && !accepted) {
@@ -239,14 +242,20 @@ module.exports = {
     console.log("\n\n", { registeredUserEmail });
 
     if (!inviteEmail.invitationEmail) {
-      return res.redirect(302, `${process.env.FRONTEND_ADDRESS}/signup`);
+     return res.json({
+       message: "No registered member for this invitation",
+       location: `${process.env.FRONTEND_ADDRESS}/signup`,
+     });
     }
 
     //if registerd,
     //check if the user is logged in
     const { email, user } = req;
     if (!user) {
-      return res.redirect(`${process.env.FRONTEND_ADDRESS}/login`);
+       return res.json({
+         message: "No logged in member for this invitation",
+         location: `${process.env.FRONTEND_ADDRESS}/login`,
+       });
     }
     //add the logged in user to the team of the project
     const concernedProject = await Project.findByPk(
@@ -270,7 +279,10 @@ module.exports = {
     console.log("\n\n in the verify", member);
 
     if (!member) {
-      return res.redirect(`${process.env.FRONTEND_ADDRESS}/signup`);
+      return res.json({
+        message: "No rgistered member for this invitation",
+        location: `${process.env.FRONTEND_ADDRESS}/signup`,
+      });
     }
 
     const projectTeam = await Team.findOne({
@@ -282,7 +294,7 @@ module.exports = {
     console.log("\n\n in the verify", projectTeam);
 
     if (!projectTeam) {
-      return res.redirect(`${process.env.FRONTEND_ADDRESS}`);
+      return res.json({message:'No team for this project', location: `${process.env.FRONTEND_ADDRESS}`});
     }
 
     member.contact = contact;
@@ -311,10 +323,7 @@ module.exports = {
       return res.status(500).json({
         message: "Error creating team member role",
       });
-    // console.log("\n\n at the level of registeredUserEmail");
-    //   teamMember.memberRole = "invitee";
-
-    //   await teamMember.save();
+ 
 
     console.log("\n\n in the verify", { member });
     console.log("\n\n in the verify", { registeredUserEmail });
@@ -323,7 +332,7 @@ module.exports = {
 
     return res.json({
       message: "Member added successfully to the project",
-      location: "http://localhost:3000/dashboard",
+      location:`${process.env.FRONTEND_ADDRESS}/dashboard`,
     });
   }),
 
