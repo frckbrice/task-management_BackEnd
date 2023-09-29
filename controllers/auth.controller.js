@@ -146,7 +146,7 @@ module.exports = {
     const foundUser = await Member.findByPk(existingEmail.projectManagerId);
 
     console.log('\n\n');
-    console.log({ foundUser });
+    console.log( foundUser );
     console.log("\n\n");
 
     //* is active is usefull to deactivate/remove a user from the app project
@@ -173,7 +173,7 @@ module.exports = {
       email: email,
     };
 
-    console.log({ userInfo });
+    console.log( userInfo );
 
     //*create token
     const accessToken = jwt.sign(
@@ -225,7 +225,7 @@ module.exports = {
       },
     });
     console.log("\n\nexistingEmail");
-    console.log({ existingEmail });
+    console.log(existingEmail );
 
     console.log("\n\nfoundUserID");
     console.log({ foundUserID: existingEmail.projectManagerId });
@@ -244,7 +244,7 @@ module.exports = {
     };
 
     console.log("\n\nuserInfo for the token ");
-    console.log({ userInfo });
+    console.log( userInfo );
 
     //*create token
     const accessToken = jwt.sign(
