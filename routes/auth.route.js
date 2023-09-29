@@ -41,7 +41,7 @@ router.route("/googleRegister").post(authController.googleRegister);
 
 router.route("/refresh").get(authController.refresh);
 
-app.get("/x-forwarded-for", (request, response) =>
+router.get("/x-forwarded-for", (request, response) =>
   response.send(request.headers["x-forwarded-for"])
 );
 
