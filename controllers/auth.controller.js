@@ -26,7 +26,7 @@ module.exports = {
     console.log("emailProvider: ", emailProvider);
 
     if (!duplicates) {
-      console.log("already in the database");
+      console.log("not already in the database");
       const registeredUser = await Member.create({
         username,
         picture: picture,
@@ -47,7 +47,8 @@ module.exports = {
         console.log("emailProvider: ", emailProvider);
 
         console.log(registeredUser);
-        return res.status(201).json({ ...registeredUser, email });
+        registeredUser.password = null;
+        return res.status(201).json({ registeredUser, email });
       }
     }
 
@@ -56,8 +57,11 @@ module.exports = {
     } ${new Date().toISOString().split("T")[1].toString().slice(0, 8)}`;
 
     await duplicates.save();
+    const registeredUser = await Member.findByPk(duplicates.projectManagerId);
 
-    res.json( email );
+    console.log(registeredUser);
+
+    return res.status(201).json({ registeredUser, email });
   }),
 
   //@desc register
@@ -106,9 +110,9 @@ module.exports = {
     if (newEmail) {
       newEmail.save();
 
-    console.log(newEmail);
-
-    return res.status(201).json({ ...registeredUser, email });
+      console.log(newEmail);
+      registeredUser.password = null;
+      return res.status(201).json({ ...registeredUser, email });
     }
 
     res.status(500).json({ message: "registration failed" });
@@ -139,7 +143,7 @@ module.exports = {
     if (!existingEmail) {
       console.log("%c not existing emailaddress: UnAuthorized", "tomato");
 
-      return res.status(401).json({ message: "UnAuthorized!" });
+      return res.status(400).json({ message: "Please sign up first" });
     }
 
     //look for the person owner of that email
@@ -164,7 +168,9 @@ module.exports = {
         "tomato"
       );
 
-      return res.status(401).json({ message: " UnAuthorized" });
+      return res
+        .status(401)
+        .json({ message: " UnAuthorized> Need to signup first" });
     }
 
     const userInfo = {
@@ -295,7 +301,8 @@ module.exports = {
     //   secure: true,
     // });
 
-    const accessToken = '', refreshToken = '';
+    const accessToken = "",
+      refreshToken = "";
 
     res.json({
       message: "cookie cleared successfully",
@@ -311,8 +318,8 @@ module.exports = {
     const authHeader = req.headers.authorization || req.headers.Authorization;
 
     // console.log("in the refresh controller", authHeader);
-    
- console.log("in the refresh before authHeader check");
+
+    console.log("in the refresh before authHeader check");
     if (!authHeader?.startsWith("Bearer")) {
       return res.status(401).send("UnAuthorized. no start with bearer");
     }
@@ -320,16 +327,16 @@ module.exports = {
     //  console.log("in the refresh after authHeader check");
 
     const refreshToken = authHeader.split(" ")[1];
-   
 
     // console.log('\n\n ');
     // console.log("refreshToken", refreshToken);
     //  console.log("\n");
 
     if (!refreshToken) {
-      return res.status(401).json({ message: "UnAuthorized. no refresh token" });
+      return res
+        .status(401)
+        .json({ message: "UnAuthorized. no refresh token" });
     }
-
 
     console.log("before verify");
     jwt.verify(
@@ -341,12 +348,12 @@ module.exports = {
         }
 
         const foundUser = await Member.findOne({
-          where: { 
+          where: {
             username: decodedUserInfo.username,
           },
         });
 
-        console.log('\n\n in the refresh')
+        console.log("\n\n in the refresh");
         console.log(foundUser);
 
         if (!foundUser) {
@@ -367,7 +374,7 @@ module.exports = {
             expiresIn: "15m",
           }
         );
-console.log("in the refresh verify");
+        console.log("in the refresh verify");
         res.json({ accessToken });
       }
     );

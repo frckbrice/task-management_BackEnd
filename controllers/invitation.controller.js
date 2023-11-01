@@ -44,9 +44,12 @@ module.exports = {
         .status(400)
         .json({ message: `No project with this id ${projectToken}` });
 
-    const prjectsummary = concernedProject.description
-      .toString()
-      .substring(0, 100);
+    // const prjectsummary = concernedProject.description
+    //   .toString()
+    //   .substring(0, 100);
+
+    const invitationContent =
+      " You are requested to join the project called " + concernedProject.name;
 
     const projectname = concernedProject?.name;
 
@@ -56,7 +59,7 @@ module.exports = {
       projectId: projectToken,
       projectManagerId: concernedProject.projectManagerId,
       notified: true,
-      content: prjectsummary,
+      content: invitationContent,
     }).catch((err) => console.log(err));
 
     console.log("\n\n after the level of invitation creation");
@@ -220,10 +223,10 @@ module.exports = {
     console.log({ inviteEmail });
     // if not invited redirect to register page
     if (!inviteEmail) {
-     return res.json({
-       message: "No valid email addresses for this invitation",
-       location: `${process.env.FRONTEND_ADDRESS}`,
-     });
+      return res.json({
+        message: "No valid email addresses for this invitation",
+        location: `${process.env.FRONTEND_ADDRESS}`,
+      });
     }
 
     if (inviteEmail && !accepted) {
@@ -242,20 +245,20 @@ module.exports = {
     console.log("\n\n", { registeredUserEmail });
 
     if (!inviteEmail.invitationEmail) {
-     return res.json({
-       message: "No registered member for this invitation",
-       location: `${process.env.FRONTEND_ADDRESS}/signup`,
-     });
+      return res.json({
+        message: "No registered member for this invitation",
+        location: `${process.env.FRONTEND_ADDRESS}/signup`,
+      });
     }
 
     //if registerd,
     //check if the user is logged in
     const { email, user } = req;
     if (!user) {
-       return res.json({
-         message: "No logged in member for this invitation",
-         location: `${process.env.FRONTEND_ADDRESS}/login`,
-       });
+      return res.json({
+        message: "No logged in member for this invitation",
+        location: `${process.env.FRONTEND_ADDRESS}/login`,
+      });
     }
     //add the logged in user to the team of the project
     const concernedProject = await Project.findByPk(
@@ -294,7 +297,10 @@ module.exports = {
     console.log("\n\n in the verify", projectTeam);
 
     if (!projectTeam) {
-      return res.json({message:'No team for this project', location: `${process.env.FRONTEND_ADDRESS}`});
+      return res.json({
+        message: "No team for this project",
+        location: `${process.env.FRONTEND_ADDRESS}`,
+      });
     }
 
     member.contact = contact;
@@ -323,7 +329,6 @@ module.exports = {
       return res.status(500).json({
         message: "Error creating team member role",
       });
- 
 
     console.log("\n\n in the verify", { member });
     console.log("\n\n in the verify", { registeredUserEmail });
@@ -332,11 +337,13 @@ module.exports = {
 
     return res.json({
       message: "Member added successfully to the project",
-      location:`${process.env.FRONTEND_ADDRESS}/dashboard`,
+      location: `${process.env.FRONTEND_ADDRESS}/dashboard`,
     });
   }),
 
   handlenotifications: asyncHandler(async (req, res) => {
+    console.log("hit handlenotifications end");
+
     const { user, email } = req;
 
     console.log({ email, user });
@@ -358,12 +365,15 @@ module.exports = {
       console.log(targetEmails);
 
       if (!targetEmails.length) {
-        return res.status(204);
+        return res.status(204).json({ message: "No target emails" });
       }
 
       const invitations = targetEmails.invitations;
 
-      return res.json(invitations);
+      const notifications = invitations?.map(
+        (invitation) => invitation.content
+      );
+      res.json(notifications);
     } else if (user) {
       const targetUser = await Member.findOne({
         where: {
@@ -372,7 +382,7 @@ module.exports = {
       });
 
       if (!targetUser) {
-        return res.status(400).json({ message: "No such targetUser" });
+        return res.status(400).json({ message: "No such user invitation" });
       }
 
       const targetEmail = await EmailAddress.findOne({
@@ -408,8 +418,10 @@ module.exports = {
       if (!invitations.length) {
         return res.status(400).json({ message: "No invitations" });
       }
-
-      res.json(invitations);
+      const notifications = invitations?.map(
+        (invitation) => invitation.content
+      );
+      res.json(notifications);
     }
   }),
 };

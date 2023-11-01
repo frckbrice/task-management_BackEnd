@@ -1,8 +1,8 @@
-const router = require('express').Router();
+const router = require("express").Router();
 
-const {projectController} = require('../controllers');
+const { projectController } = require("../controllers");
 
-const verifyJwt = require('../middleware/verifyJwt')
+const verifyJwt = require("../middleware/verifyJwt");
 
 router.use(verifyJwt);
 
@@ -13,17 +13,11 @@ router
   .patch(projectController.updateProject)
   .delete(projectController.deleteProject);
 
-router
-  .route("/members")
-  .post( projectController.getProjectMembers);
+router.route("/members").post(projectController.getProjectMembers);
 
-router
-  .route("/collaborations")
-  .get(projectController.projectCollaborations);
+router.route("/collaborations").get(projectController.projectCollaborations);
 
 module.exports = router;
-
-
 
 /*{
     path: "foodDetails/:foodId",
