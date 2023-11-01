@@ -342,16 +342,17 @@ module.exports = {
   }),
 
   handlenotifications: asyncHandler(async (req, res) => {
-    console.log("hit handlenotifications end");
-
     const { user, email } = req;
 
+    console.log("\n\n");
+    console.log("hit handlenotifications end");
     console.log({ email, user });
+    console.log("\n\n");
 
     if (email) {
       const targetEmails = await EmailAddress.findOne({
         where: {
-          invitationEmail: email,
+          designation: email,
         },
         include: {
           model: Invitation,
@@ -369,7 +370,7 @@ module.exports = {
       }
 
       const invitations = targetEmails.invitations;
-
+      console.log(invitations);
       const notifications = invitations?.map(
         (invitation) => invitation.content
       );
@@ -421,6 +422,7 @@ module.exports = {
       const notifications = invitations?.map(
         (invitation) => invitation.content
       );
+      console.log(notifications);
       res.json(notifications);
     }
   }),

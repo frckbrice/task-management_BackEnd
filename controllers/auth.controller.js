@@ -47,7 +47,7 @@ module.exports = {
         console.log("emailProvider: ", emailProvider);
 
         console.log(registeredUser);
-        registeredUser.password = null;
+
         return res.status(201).json({ registeredUser, email });
       }
     }
@@ -61,7 +61,8 @@ module.exports = {
 
     console.log(registeredUser);
 
-    return res.status(201).json({ registeredUser, email });
+    // result = registeredUser.removePassword();
+    return res.status(201).json({ ...registeredUser, email });
   }),
 
   //@desc register
@@ -111,11 +112,11 @@ module.exports = {
       newEmail.save();
 
       console.log(newEmail);
-      registeredUser.password = null;
+
+      // result = registeredUser.removePassword();
       return res.status(201).json({ ...registeredUser, email });
     }
-
-    res.status(500).json({ message: "registration failed" });
+    return res.status(500).json({ message: "server error" });
   }),
 
   //@desc Login
@@ -124,7 +125,9 @@ module.exports = {
   login: asyncHandler(async (req, res) => {
     const { email, password } = req.body;
 
-    // console.log("\n\n" + { email, password } + "\n\n");
+    console.log("\n\n");
+    console.log(email, password);
+    console.log("\n\n");
 
     if (!email || !password) {
       return res.status(400).json({ message: "All the fields are required" });
@@ -137,8 +140,8 @@ module.exports = {
       },
     });
 
-    // console.log("\n");
-    // console.log({ foundUserID: existingEmail.projectMemberId });
+    console.log("\n");
+    console.log({ foundUserID: existingEmail.projectMemberId });
 
     if (!existingEmail) {
       console.log("%c not existing emailaddress: UnAuthorized", "tomato");
@@ -149,9 +152,10 @@ module.exports = {
     //look for the person owner of that email
     const foundUser = await Member.findByPk(existingEmail.projectManagerId);
 
-    // console.log('\n\n');
-    // console.log( foundUser );
-    // console.log("\n\n");
+    console.log("\n\n");
+    console.log(foundUser);
+    console.log(foundUser.password, password);
+    console.log("\n\n");
 
     //* is active is usefull to deactivate/remove a user from the app project
     if (!foundUser || !foundUser.isActive) {
@@ -161,6 +165,8 @@ module.exports = {
     }
 
     const matchUser = await bcrypt.compare(password, foundUser.password);
+
+    console.log(matchUser);
 
     if (!matchUser) {
       console.log(
@@ -188,7 +194,7 @@ module.exports = {
       },
       process.env.ACCESS_TOKEN_SECRETKEY,
       {
-        expiresIn: "20m",
+        notBefore: "20m",
       }
     );
 
@@ -196,10 +202,11 @@ module.exports = {
     const refreshToken = jwt.sign(
       {
         username: foundUser.username,
+        email: email,
       },
       process.env.REFRESH_TOKEN_SECRETKEY,
       {
-        expiresIn: "7d",
+        notBefore: "7d",
       }
     );
 
@@ -259,7 +266,7 @@ module.exports = {
       },
       process.env.ACCESS_TOKEN_SECRETKEY,
       {
-        expiresIn: "15m",
+        notBefore: 15 * 60,
       }
     );
 
@@ -270,7 +277,7 @@ module.exports = {
       },
       process.env.REFRESH_TOKEN_SECRETKEY,
       {
-        expiresIn: "7d",
+        notBefore: 7 * 24 * 60 * 60 * 1000,
       }
     );
 
@@ -367,11 +374,12 @@ module.exports = {
             userInfo: {
               username: foundUser.username,
               roles: foundUser.role,
+              email: req.email,
             },
           },
           process.env.ACCESS_TOKEN_SECRETKEY,
           {
-            expiresIn: "15m",
+            notBefore: 15 * 60,
           }
         );
         console.log("in the refresh verify");
