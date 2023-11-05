@@ -26,7 +26,7 @@ module.exports = {
     console.log("emailProvider: ", emailProvider);
 
     if (!duplicates) {
-      console.log("already in the database");
+      console.log("not already in the database");
       const registeredUser = await Member.create({
         username,
         picture: picture,
@@ -47,7 +47,8 @@ module.exports = {
         console.log("emailProvider: ", emailProvider);
 
         console.log(registeredUser);
-        return res.status(201).json({ ...registeredUser, email });
+
+        return res.status(201).json({ registeredUser, email });
       }
     }
 
@@ -56,8 +57,12 @@ module.exports = {
     } ${new Date().toISOString().split("T")[1].toString().slice(0, 8)}`;
 
     await duplicates.save();
+    const registeredUser = await Member.findByPk(duplicates.projectManagerId);
 
-    res.json( email );
+    console.log(registeredUser);
+
+    // result = registeredUser.removePassword();
+    return res.status(201).json({ ...registeredUser, email });
   }),
 
   //@desc register
@@ -106,12 +111,12 @@ module.exports = {
     if (newEmail) {
       newEmail.save();
 
-    console.log(newEmail);
+      console.log(newEmail);
 
-    return res.status(201).json({ ...registeredUser, email });
+      // result = registeredUser.removePassword();
+      return res.status(201).json({ ...registeredUser, email });
     }
-
-    res.status(500).json({ message: "registration failed" });
+    return res.status(500).json({ message: "server error" });
   }),
 
   //@desc Login
@@ -120,7 +125,9 @@ module.exports = {
   login: asyncHandler(async (req, res) => {
     const { email, password } = req.body;
 
-    // console.log("\n\n" + { email, password } + "\n\n");
+    console.log("\n\n");
+    console.log(email, password);
+    console.log("\n\n");
 
     if (!email || !password) {
       return res.status(400).json({ message: "All the fields are required" });
@@ -133,21 +140,22 @@ module.exports = {
       },
     });
 
-    // console.log("\n");
-    // console.log({ foundUserID: existingEmail.projectMemberId });
+    console.log("\n");
+    console.log({ foundUserID: existingEmail.projectMemberId });
 
     if (!existingEmail) {
       console.log("%c not existing emailaddress: UnAuthorized", "tomato");
 
-      return res.status(401).json({ message: "UnAuthorized!" });
+      return res.status(400).json({ message: "Please sign up first" });
     }
 
     //look for the person owner of that email
     const foundUser = await Member.findByPk(existingEmail.projectManagerId);
 
-    // console.log('\n\n');
-    // console.log( foundUser );
-    // console.log("\n\n");
+    console.log("\n\n");
+    console.log(foundUser);
+    console.log(foundUser.password, password);
+    console.log("\n\n");
 
     //* is active is usefull to deactivate/remove a user from the app project
     if (!foundUser || !foundUser.isActive) {
@@ -158,13 +166,17 @@ module.exports = {
 
     const matchUser = await bcrypt.compare(password, foundUser.password);
 
+    console.log(matchUser);
+
     if (!matchUser) {
       console.log(
         "%c\n not emailOwner with password: UnAuthorized\n",
         "tomato"
       );
 
-      return res.status(401).json({ message: " UnAuthorized" });
+      return res
+        .status(401)
+        .json({ message: " UnAuthorized> Need to signup first" });
     }
 
     const userInfo = {
@@ -182,7 +194,7 @@ module.exports = {
       },
       process.env.ACCESS_TOKEN_SECRETKEY,
       {
-        expiresIn: "20m",
+        notBefore: "20m",
       }
     );
 
@@ -190,10 +202,11 @@ module.exports = {
     const refreshToken = jwt.sign(
       {
         username: foundUser.username,
+        email: email,
       },
       process.env.REFRESH_TOKEN_SECRETKEY,
       {
-        expiresIn: "7d",
+        notBefore: "7d",
       }
     );
 
@@ -253,7 +266,7 @@ module.exports = {
       },
       process.env.ACCESS_TOKEN_SECRETKEY,
       {
-        expiresIn: "15m",
+        notBefore: 15 * 60,
       }
     );
 
@@ -264,7 +277,7 @@ module.exports = {
       },
       process.env.REFRESH_TOKEN_SECRETKEY,
       {
-        expiresIn: "7d",
+        notBefore: 7 * 24 * 60 * 60 * 1000,
       }
     );
 
@@ -295,7 +308,8 @@ module.exports = {
     //   secure: true,
     // });
 
-    const accessToken = '', refreshToken = '';
+    const accessToken = "",
+      refreshToken = "";
 
     res.json({
       message: "cookie cleared successfully",
@@ -311,8 +325,8 @@ module.exports = {
     const authHeader = req.headers.authorization || req.headers.Authorization;
 
     // console.log("in the refresh controller", authHeader);
-    
- console.log("in the refresh before authHeader check");
+
+    console.log("in the refresh before authHeader check");
     if (!authHeader?.startsWith("Bearer")) {
       return res.status(401).send("UnAuthorized. no start with bearer");
     }
@@ -320,16 +334,16 @@ module.exports = {
     //  console.log("in the refresh after authHeader check");
 
     const refreshToken = authHeader.split(" ")[1];
-   
 
     // console.log('\n\n ');
     // console.log("refreshToken", refreshToken);
     //  console.log("\n");
 
     if (!refreshToken) {
-      return res.status(401).json({ message: "UnAuthorized. no refresh token" });
+      return res
+        .status(401)
+        .json({ message: "UnAuthorized. no refresh token" });
     }
-
 
     console.log("before verify");
     jwt.verify(
@@ -341,12 +355,12 @@ module.exports = {
         }
 
         const foundUser = await Member.findOne({
-          where: { 
+          where: {
             username: decodedUserInfo.username,
           },
         });
 
-        console.log('\n\n in the refresh')
+        console.log("\n\n in the refresh");
         console.log(foundUser);
 
         if (!foundUser) {
@@ -360,14 +374,15 @@ module.exports = {
             userInfo: {
               username: foundUser.username,
               roles: foundUser.role,
+              email: req.email,
             },
           },
           process.env.ACCESS_TOKEN_SECRETKEY,
           {
-            expiresIn: "15m",
+            notBefore: 15 * 60,
           }
         );
-console.log("in the refresh verify");
+        console.log("in the refresh verify");
         res.json({ accessToken });
       }
     );

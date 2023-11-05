@@ -17,6 +17,10 @@ const verifyJwt = (req, res, next) => {
 
   console.log("token", token);
 
+  if (!token) {
+    return res.status(401).send("UnAuthorized. need to login first");
+  }
+
   jwt.verify(
     token,
     process.env.ACCESS_TOKEN_SECRETKEY,
@@ -25,7 +29,6 @@ const verifyJwt = (req, res, next) => {
         return res.status(403).json({ message: "Forbidden" });
       }
 
-      
       req.user = decodedUserInfo.userInfo.username;
       req.roles = decodedUserInfo.userInfo.roles;
       if (decodedUserInfo.userInfo.email)

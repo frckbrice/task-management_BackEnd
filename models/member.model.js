@@ -65,5 +65,10 @@ module.exports = (sequelize, DataTypes) => {
     }
   );
 
+  // Member.prototype.removePassword = function () {
+  //   delete this.dataValues.password;
+  //   return this;
+  // };
+
   return Member;
 };
