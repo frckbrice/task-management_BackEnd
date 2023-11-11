@@ -253,8 +253,8 @@ module.exports = {
 
     //if registerd,
     //check if the user is logged in
-    const { email, user } = req;
-    if (!user) {
+    const { email, userId } = req;
+    if (!userId) {
       return res.json({
         message: "No logged in member for this invitation",
         location: `${process.env.FRONTEND_ADDRESS}/login`,
@@ -342,88 +342,71 @@ module.exports = {
   }),
 
   handlenotifications: asyncHandler(async (req, res) => {
-    const { user, email } = req;
+    const { email, userId } = req;
 
     console.log("\n\n");
     console.log("hit handlenotifications end");
-    console.log({ email, user });
+    console.log({ email, userId });
     console.log("\n\n");
 
-    if (email) {
-      const targetEmails = await EmailAddress.findOne({
+    // const targetEmail = await EmailAddress.findOne({
+    //   where: {
+    //     [Op.or]: {
+    //       projectManagerId: targetUser.id,
+    //       projectMemberId: targetUser.id,
+    //     },
+    //   },
+    // });
+    const targetEmail = await EmailAddress.findOne({
+      where: {
+        projectManagerId: userId,
+      },
+    });
+
+    console.log("\n\n second targetEmail");
+    console.log(targetEmail);
+
+    if (!targetEmail) {
+      return res.status(400).jsom({ message: "No such email for the user" });
+    }
+
+    const allInvitesWithTargetEmail = await EmailAddress.findAll({
+      where: {
+        invitationEmail: targetEmail.designation,
+      },
+    });
+
+    console.log("\n\n allInvitesWithTargetEmail");
+    console.log(allInvitesWithTargetEmail);
+
+    const allInvitesIds = allInvitesWithTargetEmail?.map(
+      (email) => email.invitationId
+    );
+
+    console.log("\n\n allInvitesIds");
+    console.log(allInvitesIds);
+
+    const invites = [];
+    for (const inviteId of allInvitesIds) {
+      const result = await Invitation.findOne({
         where: {
-          designation: email,
-        },
-        include: {
-          model: Invitation,
-          where: {
+          [Op.and]: {
+            id: inviteId,
             accepted: false,
           },
         },
       });
-
-      console.log("\n\ntargetEmails");
-      console.log(targetEmails);
-
-      if (!targetEmails.length) {
-        return res.status(204).json({ message: "No target emails" });
-      }
-
-      const invitations = targetEmails.invitations;
-      console.log(invitations);
-      const notifications = invitations?.map(
-        (invitation) => invitation.content
-      );
-      res.json(notifications);
-    } else if (user) {
-      const targetUser = await Member.findOne({
-        where: {
-          username: user,
-        },
-      });
-
-      if (!targetUser) {
-        return res.status(400).json({ message: "No such user invitation" });
-      }
-
-      const targetEmail = await EmailAddress.findOne({
-        where: {
-          [Op.or]: {
-            projectManagerId: targetUser.id,
-            projectMemberId: targetUser.id,
-          },
-        },
-      });
-
-      console.log("\n\ntargetEmail");
-      console.log(targetEmail);
-
-      if (!targetEmail) {
-        return res.status(400).jsom({ message: "No such email for the user" });
-      }
-
-      const invitations = await targetEmail.getInvitations({
-        where: {
-          accepted: false,
-          notified: true,
-        },
-        include: {
-          model: Project,
-          required: true,
-        },
-      });
-
-      console.log("\n\ninvitations");
-      console.log(invitations);
-
-      if (!invitations.length) {
-        return res.status(400).json({ message: "No invitations" });
-      }
-      const notifications = invitations?.map(
-        (invitation) => invitation.content
-      );
-      console.log(notifications);
-      res.json(notifications);
+      if (result) invites.push(result);
     }
+
+    console.log("\n\n invites");
+    console.log(invites);
+
+    if (!invites.length) {
+      return res.status(400).json({ message: "No invitations" });
+    }
+    const notifications = invites?.map((invitation) => invitation.content);
+    console.log(notifications);
+    res.json(notifications);
   }),
 };

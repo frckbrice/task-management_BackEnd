@@ -11,49 +11,19 @@ module.exports = {
   //access Private
 
   getAllUserProject: asyncHandler(async (req, res) => {
-    //get all projects for the authenticated user
-    const email = req.email;
-    let emailAuth;
-    let user;
-    if (email) {
-      emailAuth = await EmailAddress.findOne({
-        where: {
-          designation: email,
-        },
-      });
-      if (emailAuth) {
-        Project.findAll({
-          where: {
-            projectManagerId: emailAuth.projectManagerId,
-          },
-        }).then((data) => {
-          console.log({ project_data: data });
-          if (!data.length) {
-            return res.status(400).json({ message: "No projects found" });
-          }
-          res.json(data);
-        });
+    //*get all projects for the authenticated user
+    const { userId } = req;
+    Project.findAll({
+      where: {
+        projectManagerId: userId,
+      },
+    }).then((data) => {
+      console.log({ project_data: data });
+      if (!data.length) {
+        return res.status(400).json({ message: "No projects found" });
       }
-    } else if (req.user) {
-      user = await Member.findOne({
-        where: {
-          username: req.user,
-        },
-      });
-      Project.findAll({
-        where: {
-          projectManagerId: user.id,
-        },
-      }).then((data) => {
-        console.log({ project_data: data });
-        if (!data.length) {
-          return res.status(400).json({ message: "No projects found" });
-        }
-        res.json(data);
-      });
-    } else {
-      return res.redirect("http://localhost:3000/login");
-    }
+      res.json(data);
+    });
   }),
 
   //@desc get all project members
@@ -81,13 +51,12 @@ module.exports = {
 
     const projectMembers = await teamOfProject.getProjectMembers({
       attributes: {
-        exludes : ['password']
+        exludes: ["password"],
       },
       joinTableAttributes: [],
     });
-    console.log("\n\n" );
+    console.log("\n\n");
     console.log(projectMembers);
- 
 
     console.log("\n\n");
     console.log({ teamOfProject, projectMembers, targetProject });
@@ -151,37 +120,12 @@ module.exports = {
       remarks,
     };
 
-    const email = req.email;
-    const picture = req.picture;
-    const username = req.user;
-    console.log("\n\n");
-    console.log({ email, picture, username });
-    console.log("\n\n");
-    let existingEmail;
-    let pM;
-    let pmId;
-    if (email) {
-      existingEmail = await EmailAddress.findOne({
-        where: {
-          designation: email,
-        },
-      });
-      pmId = existingEmail.projectManagerId;
-    } else if (username) {
-      pM = await Member.findOne({
-        where: {
-          username,
-        },
-      });
-      // console.log({pM});
-      pmId = pM.id;
-    }
+    const userId = req.userId;
 
     console.log("\n\n");
-    console.log({ existingEmail, pmId });
     console.log("\n\n");
 
-    Project.create({ ...uniformProject, projectManagerId: pmId })
+    Project.create({ ...uniformProject, projectManagerId: userId })
       .then(async (data) => {
         if (data) {
           console.log("project creted successfully");
@@ -203,22 +147,16 @@ module.exports = {
               id: pmId,
             });
 
-            if (member) {
-              const teamMember = await TeamMember.create({
-                projectMemberId: member.id,
-                projectTeamId: newTeam.id,
-              });
+            // if (member) {
+            const teamMember = await TeamMember.create({
+              projectMemberId: userId,
+              projectTeamId: newTeam.id,
+            });
 
-              if (!teamMember)
-                return res.status(500).json({
-                  message: "Error creating team member role",
-                });
-            } else {
-              return res.status(400).json({
-                message:
-                  "No manager for this project. Check what's goind wrong",
+            if (!teamMember)
+              return res.status(500).json({
+                message: "Error creating team member role",
               });
-            }
 
             return res.json({
               message: `The project ${name} successfully created`,
@@ -318,9 +256,10 @@ module.exports = {
 
   projectCollaborations: asyncHandler(async (req, res) => {
     // get all projects for the authenticated user
+    const { userId } = req;
     const member = await Member.findOne({
       where: {
-        username: req.user,
+        id: userId,
       },
     });
 
@@ -348,8 +287,6 @@ module.exports = {
     console.log("\n\n");
     console.log(projects);
 
-  
     return res.json(projects);
-
   }),
 };

@@ -75,14 +75,11 @@ Project.belongsTo(Member, {
   foreignKey: "projectManagerId",
 });
 
-
 Task.belongsToMany(Member, { through: TaskMember, uniqueKey: "TaskMemberId" });
 Member.belongsToMany(Task, { through: TaskMember, uniqueKey: "TaskMemberId" });
 
-
-Team.belongsToMany(Member, { through: TeamMember});
-Member.belongsToMany(Team, { through: TeamMember});
-
+Team.belongsToMany(Member, { through: TeamMember });
+Member.belongsToMany(Team, { through: TeamMember });
 
 Member.hasMany(Invitation, { foreignKey: "projectManagerId" });
 Invitation.belongsTo(Member, {
@@ -93,19 +90,20 @@ Invitation.belongsTo(Member, {
 Project.hasMany(Invitation);
 Invitation.belongsTo(Project);
 
-
-
 Member.hasMany(EmailAddress);
-EmailAddress.belongsTo(Member, { as: "projectMember", foreignKey:'projectMemberId' });
-EmailAddress.belongsTo(Member, { as: "projectManager", foreignKey:'projectManagerId' });
+EmailAddress.belongsTo(Member, {
+  as: "projectMember",
+  foreignKey: "projectMemberId",
+});
+EmailAddress.belongsTo(Member, {
+  as: "projectManager",
+  foreignKey: "projectManagerId",
+});
 
 Project.hasOne(Team);
 Team.belongsTo(Project);
 
-
-Invitation.hasMany(EmailAddress);
 EmailAddress.belongsTo(Invitation);
+Invitation.hasMany(EmailAddress);
 
 module.exports = db;
-
-
