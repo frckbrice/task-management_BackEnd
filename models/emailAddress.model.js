@@ -10,6 +10,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     designation: {
       type: DataTypes.STRING,
+      // unique: true,
     },
     invitationEmail: {
       type: DataTypes.STRING,

@@ -213,9 +213,11 @@ module.exports = {
       });
     }
 
+    const { userId } = req;
+
     const user = await Member.findOne({
       where: {
-        username: req.user,
+        id: userId,
       },
     });
 
@@ -249,8 +251,8 @@ module.exports = {
       },
     });
 
-      console.log("\n\n");
-      console.log(userRole);
+    console.log("\n\n");
+    console.log(userRole);
 
     // if (!userRole) {
     //   console.log("\n\nNo user Role assigned");
@@ -259,7 +261,7 @@ module.exports = {
     //   });
     // }
 
-    if (user.id !== manager.id ) {
+    if (user.id !== manager.id) {
       return res.status(401).json({
         message: `UnAuthorized`,
       });

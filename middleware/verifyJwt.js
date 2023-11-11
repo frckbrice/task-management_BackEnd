@@ -21,15 +21,24 @@ const verifyJwt = (req, res, next) => {
     return res.status(401).send("UnAuthorized. need to login first");
   }
 
+  console.log("\n\n secret key: ", process.env.ACCESS_TOKEN_SECRETKEY);
+  console.log("\n\n");
+
   jwt.verify(
     token,
     process.env.ACCESS_TOKEN_SECRETKEY,
     (err, decodedUserInfo) => {
       if (err) {
+        console.log("\n\n error 403: ", err);
+        console.log("\n\n");
         return res.status(403).json({ message: "Forbidden" });
       }
 
+      if (!decodedUserInfo) {
+        return res.status(400).json({ message: "no decodedUserInfo" });
+      }
       req.user = decodedUserInfo.userInfo.username;
+      req.userId = decodedUserInfo.userInfo.userId;
       req.roles = decodedUserInfo.userInfo.roles;
       if (decodedUserInfo.userInfo.email)
         req.email = decodedUserInfo.userInfo.email;

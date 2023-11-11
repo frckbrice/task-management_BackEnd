@@ -250,7 +250,8 @@ module.exports = {
     // console.log({ foundUser });
 
     const userInfo = {
-      username: foundUser?.username,
+      userId: foundUser?.id,
+      userName: foundUser?.userName,
       roles: foundUser?.role,
       email: email,
       picture: foundUser?.picture,
@@ -266,18 +267,19 @@ module.exports = {
       },
       process.env.ACCESS_TOKEN_SECRETKEY,
       {
-        notBefore: 15 * 60,
+        expiresIn: "15m",
       }
     );
 
     //*create refresh token on backend
     const refreshToken = jwt.sign(
       {
-        username: foundUser.username,
+        userId: foundUser.id,
+        userName: foundUser?.name,
       },
       process.env.REFRESH_TOKEN_SECRETKEY,
       {
-        notBefore: 7 * 24 * 60 * 60 * 1000,
+        expiresIn: "5d",
       }
     );
 
@@ -356,7 +358,7 @@ module.exports = {
 
         const foundUser = await Member.findOne({
           where: {
-            username: decodedUserInfo.username,
+            id: decodedUserInfo.userId,
           },
         });
 
@@ -372,14 +374,15 @@ module.exports = {
         const accessToken = jwt.sign(
           {
             userInfo: {
-              username: foundUser.username,
+              userId: foundUser?.id,
+              user: foundUser.username,
               roles: foundUser.role,
               email: req.email,
             },
           },
           process.env.ACCESS_TOKEN_SECRETKEY,
           {
-            notBefore: 15 * 60,
+            expiresIn: "15m",
           }
         );
         console.log("in the refresh verify");
