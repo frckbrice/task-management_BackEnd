@@ -9,21 +9,14 @@ const corsOptions = require("./config/corsOptions.Js");
 const cookieParser = require("cookie-parser");
 const path = require("path");
 const db = require("./models");
-const passport = require("passport");
-const session = require("express-session");
-const uuid = require("uuid").v4;
-const verifyJwt = require("./middleware/verifyJwt");
 
 const PORT = process.env.PORT || 4000;
 const app = express();
-app.set("trust proxy", 1);
-
 
 app.use(logger);
 app.use(cors(corsOptions));
 
-// require("./auth/passport");
-// require("./auth/passportGoogleSSO");
+app.set("trust proxy", 1);
 
 app.use(
   express.json({
@@ -44,25 +37,6 @@ app.use("/teams", require("./routes/team.routes"));
 app.use("/auth", require("./routes/auth.route"));
 app.use("/invitation", require("./routes/invitation.route"));
 app.use("/projectstatus", require("./routes/projectstatus.route"));
-
-// add & configure middleware
-// app.use(
-//   session({
-//     genid: (req) => {
-//       console.log("Inside the session middleware");
-//       console.log(req.sessionID);
-//       console.log(req.session);
-//       return uuid(); // use UUIDs for session IDs
-
-//     },
-//     secret: "keyboard cat",
-//     resave: false,
-//     saveUninitialized: true,
-//   })
-// );
-
-// app.use(passport.initialize());
-// app.use(passport.session());
 
 app.all("*", root.noRoutes);
 app.use(errorHandler);
