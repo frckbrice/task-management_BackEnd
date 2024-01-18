@@ -8,6 +8,7 @@ const corsOptions = {
       callback(null, true);
     } else {
       console.log("origin: ", origin);
+      console.log(allowedOrigin.includes(origin));
       callback(new Error("NOT ALLOW BECAUSE OF CORS"));
     }
   },
